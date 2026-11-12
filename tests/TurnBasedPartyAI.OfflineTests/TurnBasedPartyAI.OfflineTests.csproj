@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The mod's checks on WotR.Testing (external/wotr-testing): real game assemblies, blueprints and turn-based combat, no game process. -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\GamePath.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\GamePath.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)..\..\</RepositoryRoot>
+    <WotrTestingRoot>$(RepositoryRoot)external\wotr-testing\</WotrTestingRoot>
+  </PropertyGroup>
+
+  <Import Project="$(WotrTestingRoot)src\WotR.Testing.Offline\build\WotR.Testing.Offline.targets" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
+    <ProjectReference Include="$(WotrTestingRoot)src\WotR.Testing.Offline\WotR.Testing.Offline.csproj" AdditionalProperties="WrathInstallDir=$(WrathInstallDir)" />
+    <Reference Include="$(WotrManaged)/UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(WotrManaged)/AstarPathfindingProject.dll" Private="false" />
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Build the mod from source first, without deploying it, against the same game inputs; the run loads it as UnityModManager does. -->
+  <Target Name="BuildTurnBasedPartyAI" BeforeTargets="EnsureWotrInputs">
+    <MSBuild Projects="$(RepositoryRoot)src\TurnBasedPartyAI\TurnBasedPartyAI.csproj" Properties="Configuration=$(Configuration);DeployToGame=false;WrathInstallDir=$(WrathInstallDir)" Targets="Build" />
+    <MSBuild Projects="$(RepositoryRoot)src\TurnBasedPartyAI\TurnBasedPartyAI.csproj" Properties="Configuration=$(Configuration);DeployToGame=false;WrathInstallDir=$(WrathInstallDir)" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="_TurnBasedPartyAIAssembly" />
+    </MSBuild>
+    <PropertyGroup>
+      <WotrModAssembly>%(_TurnBasedPartyAIAssembly.FullPath)</WotrModAssembly>
+    </PropertyGroup>
+  </Target>
+</Project>

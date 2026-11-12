@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/TurnBasedPartyAI/TurnBasedPartyAI.csproj" />
+  <Project Path="tests/TurnBasedPartyAI.OfflineTests/TurnBasedPartyAI.OfflineTests.csproj" />
+</Solution>

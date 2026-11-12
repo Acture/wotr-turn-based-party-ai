@@ -1,0 +1,11 @@
+{
+	"Id": "TurnBasedPartyAI",
+	"DisplayName": "Turn-Based Party AI",
+	"Author": "acturea",
+	"Version": "0.1.0",
+	"ManagerVersion": "0.27.11",
+	"Requirements": [],
+	"AssemblyName": "TurnBasedPartyAI.dll",
+	"EntryMethod": "TurnBasedPartyAI.Main.Load",
+	"HomePage": "https://github.com/Acture/wotr-turn-based-party-ai"
+}

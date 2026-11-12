@@ -1,0 +1,26 @@
+# Build outputs and test reports
+artifacts/
+internal/
+STATUS.md
+bin/
+obj/
+.vs/
+*.user
+
+# Local game path (see README)
+GamePath.props
+
+.DS_Store
+.env
+.env.*
+!.env.example
+!.env.template
+.obsidian/
+.smart-env/
+*credentials-backup*
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.ty_cache/
+*.log

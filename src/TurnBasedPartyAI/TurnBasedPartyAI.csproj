@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="$(MSBuildThisFileDirectory)..\..\GamePath.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\GamePath.props')" />
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<OutputType>Library</OutputType>
+		<Version>0.1.0</Version>
+		<AssemblyName>TurnBasedPartyAI</AssemblyName>
+		<RootNamespace>TurnBasedPartyAI</RootNamespace>
+		<LangVersion>latest</LangVersion>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- Copying into the game is opt-in: -p:DeployToGame=true -->
+		<DeployToGame Condition="'$(DeployToGame)'==''">false</DeployToGame>
+		<WrathInstallDir Condition="'$(WrathInstallDir)'==''">$(WrathPath)</WrathInstallDir>
+		<WrathInstallDir Condition="'$(WrathInstallDir)'==''">$([System.Environment]::GetEnvironmentVariable('WrathPath'))</WrathInstallDir>
+		<WrathInstallDir Condition="'$(WrathInstallDir)'==''">$([System.Environment]::GetEnvironmentVariable('WRATH_PATH'))</WrathInstallDir>
+		<WrathManaged>$(WrathInstallDir)\Wrath_Data\Managed</WrathManaged>
+	</PropertyGroup>
+
+	<Target Name="EnsureWrathInstallDir" BeforeTargets="PrepareForBuild" Condition="'$(WrathInstallDir)'==''">
+		<Error Text="WrathInstallDir is not set. Create GamePath.props at the repository root, pass -p:WrathInstallDir=..., or set WrathPath." />
+	</Target>
+
+	<ItemGroup>
+		<Reference Include="$(WrathManaged)\Assembly-CSharp.dll" Private="false" />
+		<Reference Include="$(WrathManaged)\Owlcat*.dll" Private="false" />
+		<Reference Include="$(WrathManaged)\Unity*.dll" Private="false" />
+		<Reference Include="$(WrathManaged)\UnityModManager\UnityModManager.dll" Private="false" />
+		<Reference Include="$(WrathManaged)\UnityModManager\0Harmony.dll" Private="false" />
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Info.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<Target Name="PackageMod" AfterTargets="Build">
+		<PropertyGroup>
+			<PackageDir>$(MSBuildThisFileDirectory)..\..\artifacts\packages</PackageDir>
+			<StageDir>$(MSBuildThisFileDirectory)..\..\artifacts\stage\TurnBasedPartyAI</StageDir>
+		</PropertyGroup>
+		<RemoveDir Directories="$(StageDir)" />
+		<Copy SourceFiles="$(TargetPath);$(OutDir)Info.json" DestinationFolder="$(StageDir)" />
+		<MakeDir Directories="$(PackageDir)" />
+		<ZipDirectory SourceDirectory="$(StageDir)\.." DestinationFile="$(PackageDir)\TurnBasedPartyAI-$(Version).zip" Overwrite="true" />
+	</Target>
+
+	<Target Name="DeployMod" AfterTargets="PackageMod" Condition="'$(DeployToGame)'=='true'">
+		<Copy SourceFiles="$(TargetPath);$(OutDir)Info.json" DestinationFolder="$(WrathInstallDir)\Mods\TurnBasedPartyAI" />
+		<Message Text="Deployed TurnBasedPartyAI to $(WrathInstallDir)\Mods\TurnBasedPartyAI" Importance="High" />
+	</Target>
+</Project>
