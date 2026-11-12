@@ -65,8 +65,10 @@ namespace TurnBasedPartyAI.OfflineTests
 
         /// <summary>
         /// A turn-based skirmish of the game's own units: the main character p0 and the companion p1 against two demons.
+        /// The party members named in <paramref name="aiOn"/> have their AI button switched on, as the player switches it
+        /// (<c>BattleUnitSpec.WithAI</c>: the turn-based setting, since the battle is turn-based).
         /// </summary>
-        private static BattleScenario Skirmish(bool limitedAI = false)
+        private static BattleScenario Skirmish(bool limitedAI = false, params string[] aiOn)
         {
             var scenario = new BattleScenario("party-ai-skirmish")
             {
@@ -82,19 +84,13 @@ namespace TurnBasedPartyAI.OfflineTests
             scenario.Companions.Add("p1");
             scenario.Unit("e0", "enemies", Guids.Brimorak).WithFaction(Guids.MobsFaction).At(52f, 40, -68f);
             scenario.Unit("e1", "enemies", Guids.FerociousSchir).WithFaction(Guids.MobsFaction).At(52f, 40, -70f);
+            foreach (var id in aiOn) scenario.Units.First(u => u.Id == id).WithAI(true);
             return scenario;
         }
 
         private static UnitEntityData[] Party(OfflineBattle battle) => new[] { battle.Unit("p0"), battle.Unit("p1") };
 
         private static UnitEntityData[] Enemies(OfflineBattle battle) => new[] { battle.Unit("e0"), battle.Unit("e1") };
-
-        /// <summary>The AI button on the action bar and the party portraits: it writes the turn-based switch while turn-based mode is on.</summary>
-        private static void SwitchAiOn(UnitEntityData unit)
-        {
-            unit.IsAIEnabled = true;
-            Assert.True(unit.IsAIEnabled);
-        }
 
         private static bool Decided(OfflineBattle battle)
             => !Party(battle).Any(u => u.Descriptor.State.IsConscious) || !Enemies(battle).Any(u => u.Descriptor.State.IsConscious);
@@ -112,9 +108,9 @@ namespace TurnBasedPartyAI.OfflineTests
         public void TheGamesAiPlaysTheTurnsOfPartyMembersWhoseTurnBasedAiSwitchIsOn()
         {
             game.RequireGame();
-            using var battle = OfflineBattle.Start(Skirmish(), 1);
+            using var battle = OfflineBattle.Start(Skirmish(false, "p0", "p1"), 1);
             var party = Party(battle);
-            foreach (var unit in party) SwitchAiOn(unit);
+            Assert.All(party, u => Assert.True(u.IsAIEnabled));
             // The switch alone does not take control from the player.
             Assert.All(party, u => Assert.True(u.IsDirectlyControllable));
             var log = new TurnLog();
@@ -139,6 +135,8 @@ namespace TurnBasedPartyAI.OfflineTests
             game.RequireGame();
             using var battle = OfflineBattle.Start(Skirmish(), 1);
             var party = Party(battle);
+            // Off is the game's default for turn-based mode.
+            Assert.All(party, u => Assert.False(u.IsAIEnabled));
             var log = new TurnLog();
             battle.Subscribe(log);
 
@@ -156,9 +154,10 @@ namespace TurnBasedPartyAI.OfflineTests
         public void TheSwitchIsPerCharacter()
         {
             game.RequireGame();
-            using var battle = OfflineBattle.Start(Skirmish(), 1);
+            using var battle = OfflineBattle.Start(Skirmish(false, "p1"), 1);
             UnitEntityData player = battle.Unit("p0"), companion = battle.Unit("p1");
-            SwitchAiOn(companion);
+            Assert.False(player.IsAIEnabled);
+            Assert.True(companion.IsAIEnabled);
             var log = new TurnLog();
             battle.Subscribe(log);
 
@@ -192,9 +191,8 @@ namespace TurnBasedPartyAI.OfflineTests
         public void TheLimitedAiOptionLimitsThePartyAiAsInRealTime(bool limitedAI)
         {
             game.RequireGame();
-            using var battle = OfflineBattle.Start(Skirmish(limitedAI), 1);
+            using var battle = OfflineBattle.Start(Skirmish(limitedAI, "p0", "p1"), 1);
             var party = Party(battle);
-            foreach (var unit in party) SwitchAiOn(unit);
             var log = new TurnLog();
             // At the start of each party turn, for every action of the brain: whether the game's AI may choose it while
             // the mod holds the turn, and whether it may for the same unit under the player's direct control (the
