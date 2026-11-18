@@ -20,9 +20,9 @@
 - If one of the mod's patches cannot be applied, the mod removes all of them and Unity Mod Manager
   reports it as not loaded, instead of running with only some of them.
 - Building needs Mod Menu installed (or `-p:ModMenuDll=...`); playing does not.
-- Offline tests on the game's Unity Mono through the `external/wotr-testing` submodule, now pinned
-  to its main branch, with Mod Menu loaded. They switch the AI as the player does
-  (`BattleUnitSpec.WithAI`) and cover the cases above, combat ending during an AI-played turn, and
-  a seeded battle with every button off that must run exactly as without the mod. On .NET
-  Framework the mod is loaded without Mod Menu and the tests marked `Runtime=UnityMono` are left
-  out.
+- Offline tests on the game's Unity Mono through the `WotR.Testing` NuGet package
+  (0.1.0-preview.4), run with `dotnet test`, with Mod Menu loaded. They switch the AI as the player
+  does (`BattleUnitSpec.WithAI`) and cover the cases above, combat ending during an AI-played
+  turn, and a seeded battle with every button off that must run exactly as without the mod. With
+  `-p:WotrRuntime=netfx` (.NET Framework) the mod is loaded without Mod Menu and the tests marked
+  `Runtime=UnityMono` are left out.

@@ -89,7 +89,7 @@ namespace TurnBasedPartyAI.OfflineTests
         /// <summary>
         /// The frames after the switch include the end of an attack by a unit the player now controls. On .NET Framework
         /// a turn-based attack by a unit the player controls ends the test process, also without this mod (wotr-testing),
-        /// so this test runs on the game's Unity Mono only; scripts/Invoke-OfflineTests.ps1 leaves it out on netfx.
+        /// so this test runs on the game's Unity Mono only; the test project leaves it out with -p:WotrRuntime=netfx.
         /// </summary>
         [Fact]
         [Trait("Runtime", "UnityMono")]

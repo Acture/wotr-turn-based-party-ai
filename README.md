@@ -108,16 +108,18 @@ dotnet build src/TurnBasedPartyAI/TurnBasedPartyAI.csproj -p:DeployToGame=true  
 ## Tests
 
 The offline tests run the game's own code (turn-based combat, its AI and rules) on the game's
-Unity Mono runtime without starting the game, through
-[wotr-testing](https://github.com/Acture/wotr-testing) in the `external/wotr-testing` submodule.
-They load the mod as Unity Mod Manager does, with Mod Menu loaded first, and fight turn-based
-battles with the game's units.
+Unity Mono runtime without starting the game, through the
+[WotR.Testing](https://github.com/Acture/wotr-testing) NuGet package. They load the mod as Unity
+Mod Manager does, with Mod Menu loaded first, and fight turn-based battles with the game's units.
+They need the same game installation and Mod Menu as the build.
 
 ```powershell
-git submodule update --init external/wotr-testing   # not --recursive
-pwsh -NoProfile -File scripts/Invoke-OfflineTests.ps1
-pwsh -NoProfile -File scripts/Invoke-OfflineTests.ps1 -Runtime netfx   # .NET Framework instead of the game's Mono
+dotnet test tests/TurnBasedPartyAI.OfflineTests/TurnBasedPartyAI.OfflineTests.csproj
+dotnet test tests/TurnBasedPartyAI.OfflineTests/TurnBasedPartyAI.OfflineTests.csproj -p:WotrRuntime=netfx   # .NET Framework instead of the game's Mono
 ```
+
+The package checks every run (no tests, missing reports or a different runtime fail it) and writes
+its environment reports under `artifacts/bin/TurnBasedPartyAI.OfflineTests/`.
 
 They check that the AI plays the turns it is to play and only those; the AI button switching both
 modes; each kind's mode, single characters' modes and how the mod sorts characters into kinds; the
@@ -130,8 +132,8 @@ Mod Menu builds its pages from Unity objects, which do not exist offline, so the
 not built in the tests: they check that the mod then logs it and keeps working, and set the modes
 the page would set directly. On .NET Framework, Mod Menu's own patches do not apply and a
 turn-based attack by a character the player controls ends the test process, also without this
-mod. There the script loads the mod without Mod Menu and leaves out the tests marked
-`Runtime=UnityMono`. Leaving turn-based mode during combat pauses the game, which the offline
+mod. With `-p:WotrRuntime=netfx` the test project therefore loads the mod without Mod Menu and
+leaves out the tests marked `Runtime=UnityMono`; a `--filter` of your own replaces that filter. Leaving turn-based mode during combat pauses the game, which the offline
 battles do not run, so that case is not covered offline.
 
 Offline results do not replace a check in the game.

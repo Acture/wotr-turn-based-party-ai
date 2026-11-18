@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The mod's checks on WotR.Testing (external/wotr-testing): real game assemblies, blueprints and turn-based combat, no game process. -->
+  <!-- The mod's checks on WotR.Testing (NuGet): real game assemblies, blueprints and turn-based combat, no game process.
+       dotnet test runs them on the game's Unity Mono runtime; -p:WotrRuntime=netfx on .NET Framework. -->
   <Import Project="$(MSBuildThisFileDirectory)..\..\GamePath.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\GamePath.props')" />
 
   <PropertyGroup>
@@ -10,26 +11,25 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RepositoryRoot>$(MSBuildThisFileDirectory)..\..\</RepositoryRoot>
-    <WotrTestingRoot>$(RepositoryRoot)external\wotr-testing\</WotrTestingRoot>
     <ModMenuDll Condition="'$(ModMenuDll)'==''">$(WrathInstallDir)\Mods\ModMenu\ModMenu.dll</ModMenuDll>
+    <!-- On .NET Framework a turn-based attack by a unit the player controls ends the test process, also without this mod,
+         and Mod Menu's own patches do not apply: tests with the trait Runtime=UnityMono run on the game's Unity Mono only. -->
+    <VSTestTestCaseFilter Condition="'$(WotrRuntime)'=='netfx' and '$(VSTestTestCaseFilter)'==''">Runtime!=UnityMono</VSTestTestCaseFilter>
   </PropertyGroup>
 
-  <Import Project="$(WotrTestingRoot)src\WotR.Testing.Offline\build\WotR.Testing.Offline.targets" />
-
   <ItemGroup>
+    <PackageReference Include="WotR.Testing" Version="0.1.0-preview.4" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
-    <ProjectReference Include="$(WotrTestingRoot)src\WotR.Testing.Offline\WotR.Testing.Offline.csproj" AdditionalProperties="WrathInstallDir=$(WrathInstallDir)" />
     <Reference Include="$(WotrManaged)/UnityEngine.PhysicsModule.dll" Private="false" />
     <Reference Include="$(WotrManaged)/AstarPathfindingProject.dll" Private="false" />
     <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-    <!-- Mod Menu (optional for players, needed to build the mod) is loaded first, so the mod's Mod Menu page runs too.
-         Its own patches do not apply on .NET Framework: scripts/Invoke-OfflineTests.ps1 sets
-         TurnBasedPartyAIWithoutModMenu=true for netfx, which then runs the mod as a player without Mod Menu has it. -->
-    <WotrDependencyMod Include="$(ModMenuDll)" Condition="'$(TurnBasedPartyAIWithoutModMenu)'!='true'" />
-    <Reference Include="$(ModMenuDll)" Private="false" Condition="'$(TurnBasedPartyAIWithoutModMenu)'=='true'" />
+    <!-- Mod Menu (optional for players, needed to build the mod) is loaded first on Unity Mono, so the mod's Mod Menu page
+         runs too. On .NET Framework, where its patches do not apply, the mod runs as a player without Mod Menu has it. -->
+    <WotrDependencyMod Include="$(ModMenuDll)" Condition="'$(WotrRuntime)'!='netfx'" />
+    <Reference Include="$(ModMenuDll)" Private="false" Condition="'$(WotrRuntime)'=='netfx'" />
   </ItemGroup>
 
   <!-- Build the mod from source first, without deploying it, against the same game inputs; the run loads it as UnityModManager does. -->
