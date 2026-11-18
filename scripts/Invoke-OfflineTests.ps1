@@ -27,10 +27,15 @@ $arguments = @{
 if ($WotrInputRoot) { $arguments.WotrInputRoot = $WotrInputRoot }
 if ($Runtime -eq 'netfx') {
     # On .NET Framework a turn-based attack by a unit the player controls ends the test process, also without this mod
-    # (wotr-testing). Tests that need one carry the trait Runtime=UnityMono and run on the game's Unity Mono only.
+    # (wotr-testing), and Mod Menu's own patches do not apply. Tests that need either carry the trait Runtime=UnityMono
+    # and run on the game's Unity Mono only; the netfx run loads the mod without Mod Menu.
     $unityMonoOnly = 'Runtime!=UnityMono'
     $Filter = if ($Filter) { "($Filter)&$unityMonoOnly" } else { $unityMonoOnly }
-    Write-Host "netfx: leaving out tests with the trait Runtime=UnityMono (filter: $Filter)."
+    $env:TurnBasedPartyAIWithoutModMenu = 'true'
+    Write-Host "netfx: without Mod Menu, leaving out tests with the trait Runtime=UnityMono (filter: $Filter)."
+}
+else {
+    $env:TurnBasedPartyAIWithoutModMenu = 'false'
 }
 if ($Filter) { $arguments.Filter = $Filter }
 & $runner @arguments

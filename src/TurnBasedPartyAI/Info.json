@@ -6,6 +6,7 @@
 	"ManagerVersion": "0.27.11",
 	"GameVersion": "2.7.0",
 	"Requirements": [],
+	"LoadAfter": [ "ModMenu" ],
 	"AssemblyName": "TurnBasedPartyAI.dll",
 	"EntryMethod": "TurnBasedPartyAI.Main.Load",
 	"HomePage": "https://github.com/Acture/wotr-turn-based-party-ai"

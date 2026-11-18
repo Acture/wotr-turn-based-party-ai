@@ -11,6 +11,7 @@
     <IsTestProject>true</IsTestProject>
     <RepositoryRoot>$(MSBuildThisFileDirectory)..\..\</RepositoryRoot>
     <WotrTestingRoot>$(RepositoryRoot)external\wotr-testing\</WotrTestingRoot>
+    <ModMenuDll Condition="'$(ModMenuDll)'==''">$(WrathInstallDir)\Mods\ModMenu\ModMenu.dll</ModMenuDll>
   </PropertyGroup>
 
   <Import Project="$(WotrTestingRoot)src\WotR.Testing.Offline\build\WotR.Testing.Offline.targets" />
@@ -24,6 +25,11 @@
     <Reference Include="$(WotrManaged)/UnityEngine.PhysicsModule.dll" Private="false" />
     <Reference Include="$(WotrManaged)/AstarPathfindingProject.dll" Private="false" />
     <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Mod Menu (optional for players, needed to build the mod) is loaded first, so the mod's Mod Menu page runs too.
+         Its own patches do not apply on .NET Framework: scripts/Invoke-OfflineTests.ps1 sets
+         TurnBasedPartyAIWithoutModMenu=true for netfx, which then runs the mod as a player without Mod Menu has it. -->
+    <WotrDependencyMod Include="$(ModMenuDll)" Condition="'$(TurnBasedPartyAIWithoutModMenu)'!='true'" />
+    <Reference Include="$(ModMenuDll)" Private="false" Condition="'$(TurnBasedPartyAIWithoutModMenu)'=='true'" />
   </ItemGroup>
 
   <!-- Build the mod from source first, without deploying it, against the same game inputs; the run loads it as UnityModManager does. -->

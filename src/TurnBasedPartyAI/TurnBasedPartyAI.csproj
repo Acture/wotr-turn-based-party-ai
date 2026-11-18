@@ -16,10 +16,16 @@
 		<WrathInstallDir Condition="'$(WrathInstallDir)'==''">$([System.Environment]::GetEnvironmentVariable('WrathPath'))</WrathInstallDir>
 		<WrathInstallDir Condition="'$(WrathInstallDir)'==''">$([System.Environment]::GetEnvironmentVariable('WRATH_PATH'))</WrathInstallDir>
 		<WrathManaged>$(WrathInstallDir)\Wrath_Data\Managed</WrathManaged>
+		<!-- Mod Menu is optional when playing; building needs its assembly (compile-time reference only, never packaged). -->
+		<ModMenuDll Condition="'$(ModMenuDll)'==''">$(WrathInstallDir)\Mods\ModMenu\ModMenu.dll</ModMenuDll>
 	</PropertyGroup>
 
 	<Target Name="EnsureWrathInstallDir" BeforeTargets="PrepareForBuild" Condition="'$(WrathInstallDir)'==''">
 		<Error Text="WrathInstallDir is not set. Create GamePath.props at the repository root, pass -p:WrathInstallDir=..., or set WrathPath." />
+	</Target>
+
+	<Target Name="EnsureModMenu" BeforeTargets="PrepareForBuild" Condition="'$(WrathInstallDir)'!='' and !Exists('$(ModMenuDll)')">
+		<Error Text="ModMenu.dll was not found at $(ModMenuDll). Install Mod Menu into the game's Mods folder or pass -p:ModMenuDll=path\to\ModMenu.dll." />
 	</Target>
 
 	<ItemGroup>
@@ -28,6 +34,7 @@
 		<Reference Include="$(WrathManaged)\Unity*.dll" Private="false" />
 		<Reference Include="$(WrathManaged)\UnityModManager\UnityModManager.dll" Private="false" />
 		<Reference Include="$(WrathManaged)\UnityModManager\0Harmony.dll" Private="false" />
+		<Reference Include="$(ModMenuDll)" Private="false" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
 	</ItemGroup>
 

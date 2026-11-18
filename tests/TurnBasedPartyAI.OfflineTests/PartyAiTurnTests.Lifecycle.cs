@@ -186,32 +186,30 @@ namespace TurnBasedPartyAI.OfflineTests
         }
 
         [Fact]
-        public void WhenTheGameForcesTurnBasedCombatOnARealTimePlayerTheirPartyWaitsForThem()
+        public void WhenTheGameForcesTurnBasedCombatTheAiButtonDecides()
         {
             game.RequireGame();
-            var scenario = Skirmish();
+            // A player who plays in real time switches the companion's AI off before the fight; the main character's
+            // AI stays as the game sets it.
+            var scenario = Skirmish(false);
             scenario.TurnBased = false;
+            scenario.Units.First(u => u.Id == "p1").WithAI(false);
             using var battle = OfflineBattle.Start(scenario, 1);
             var setting = SettingsRoot.Game.TurnBased.EnableTurnBasedMode;
             Assert.False((bool)setting, "The session's turn-based setting is on; this test needs a player who plays in real time.");
-            var party = Party(battle);
-            // The AI button then shows and writes the real-time switch, which is on by default.
-            Assert.All(party, u => Assert.True(u.IsAIEnabled));
+            UnitEntityData player = battle.Unit("p0"), companion = battle.Unit("p1");
+            // The AI button shows the real-time switch: on by default for the main character, off for the companion.
+            Assert.True(player.IsAIEnabled);
+            Assert.False(companion.IsAIEnabled);
 
             ForceTurnBasedCombat(true);
             try
             {
                 Assert.True(Game.Instance.Player.IsTurnBasedModeOn());
-                var turn = RunUntilTurn(battle, t => party.Contains(t.Rider));
-                Assert.NotNull(turn);
+                var log = RunUntilBothHadATurn(battle);
                 Assert.True(CombatController.IsInTurnBasedCombat());
-
-                // As in the game, the turn waits for the player.
-                battle.Run(TimeSpan.FromSeconds(5));
-                Assert.Same(turn, CurrentTurn);
-                Assert.True(turn.Rider.IsDirectlyControllable);
-                Assert.False((bool)turn.Rider.PreventDirectControl);
-                Assert.Equal(TurnController.TurnStatus.Preparing, turn.Status);
+                Assert.True(AiPlayed(log, player));
+                Assert.False(AiPlayed(log, companion));
             }
             finally
             {

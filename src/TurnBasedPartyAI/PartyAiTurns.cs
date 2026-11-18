@@ -5,7 +5,6 @@ using HarmonyLib;
 using Kingmaker.AI;
 using Kingmaker.AI.Blueprints;
 using Kingmaker.EntitySystem.Entities;
-using Kingmaker.Settings;
 using TurnBased.Controllers;
 
 namespace TurnBasedPartyAI
@@ -14,14 +13,14 @@ namespace TurnBasedPartyAI
     /// Party members whose turn the game's AI plays in turn-based combat.
     ///
     /// The game keeps a separate AI switch for turn-based mode (the AI button on the action bar and the party portraits
-    /// writes it while turn-based mode is on; <c>UnitEntityData.IsAIEnabled</c> reads it), but in 2.7.0 nothing acts
-    /// on it: the turn of a unit the player controls waits for the player. When such a turn starts and the unit's
-    /// switch is on, this mod retains the game's own <c>UnitEntityData.PreventDirectControl</c> for that turn. The game
-    /// then plays the turn as it plays the turn of a party member the player does not control (the game itself uses
-    /// this flag in story scenes, for fleeing units and during resurrection): its <c>TurnController</c> lets
-    /// <c>AiBrainController</c> choose the unit's actions with the unit's own brain and ends the turn when the AI is
-    /// done. The flag is released when the turn ends or is dropped, or when the player switches the unit's AI off
-    /// during the turn.
+    /// writes it while the turn-based setting is on; <c>UnitEntityData.IsAIEnabled</c> reads it), but in 2.7.0 nothing
+    /// acts on it: the turn of a unit the player controls waits for the player. When such a turn starts and
+    /// <see cref="TurnRules"/> gives it to the AI, this mod retains the game's own
+    /// <c>UnitEntityData.PreventDirectControl</c> for that turn. The game then plays the turn as it plays the turn of a
+    /// party member the player does not control (the game itself uses this flag in story scenes, for fleeing units and
+    /// during resurrection): its <c>TurnController</c> lets <c>AiBrainController</c> choose the unit's actions with the
+    /// unit's own brain and ends the turn when the AI is done. The flag is released when the turn ends or is dropped,
+    /// or when the player switches the unit's AI off during the turn.
     /// </summary>
     internal static class PartyAiTurns
     {
@@ -40,19 +39,13 @@ namespace TurnBasedPartyAI
 
         internal static void Begin(TurnController turn)
         {
-            // The AI button is the turn-based switch only while the player's turn-based setting is on. A fight in
-            // which the game forces turn-based combat with that setting off (EtudeBracketForceCombatMode) shows and
-            // writes the real-time switch, which is on by default; those turns stay the player's, as in the game.
-            if (!(bool)SettingsRoot.Game.TurnBased.EnableTurnBasedMode) return;
             Hold(turn, turn.Rider);
             Hold(turn, turn.Mount);
         }
 
         private static void Hold(TurnController turn, UnitEntityData unit)
         {
-            // IsAIEnabled reads the turn-based switch while the turn-based setting is on, and includes the game's
-            // BlueprintRoot.CompanionsAI.
-            if (unit == null || HeldBy.ContainsKey(unit) || !unit.IsInCombat || !unit.IsDirectlyControllable || !unit.IsAIEnabled) return;
+            if (unit == null || HeldBy.ContainsKey(unit) || !unit.IsInCombat || !unit.IsDirectlyControllable || !TurnRules.AiPlays(unit)) return;
             unit.PreventDirectControl.Retain();
             HeldBy.Add(unit, turn);
         }
@@ -103,18 +96,27 @@ namespace TurnBasedPartyAI
     }
 
     /// <summary>
-    /// The AI button switched off during the unit's own AI-played turn. Both of the game's AI buttons (the action bar
-    /// and the party portraits) write <c>UnitEntityData.IsAIEnabled</c> and then show what it reads, which is always on
-    /// for a unit the player does not control. Releasing the flag here gives the rest of the turn to the player at once,
-    /// and the button shows the switch as off. The game's AI does not choose actions in turn-based combat for a unit
-    /// the player controls; an action it has already started finishes.
+    /// The AI button. Both of the game's AI buttons (the action bar and the party portraits) write
+    /// <c>UnitEntityData.IsAIEnabled</c>, whose setter writes only the switch of the current turn-based setting: real
+    /// time or turn-based. The button now sets both switches to the same value, so it means the same in both modes and
+    /// in fights the game forces into turn-based mode.
+    ///
+    /// Switched off during the unit's own AI-played turn, it also gives the rest of the turn to the player at once. The
+    /// buttons then show what <c>IsAIEnabled</c> reads, which is always on for a unit the player does not control, so
+    /// without releasing the flag here the button would keep showing on. The game's AI does not choose actions in
+    /// turn-based combat for a unit the player controls; an action it has already started finishes.
     /// </summary>
     [HarmonyPatch(typeof(UnitEntityData), nameof(UnitEntityData.IsAIEnabled), MethodType.Setter)]
     internal static class AiSwitchPatch
     {
+        private static readonly AccessTools.FieldRef<UnitEntityData, bool> RealTime = AccessTools.FieldRefAccess<UnitEntityData, bool>("m_AiEnabled");
+        private static readonly AccessTools.FieldRef<UnitEntityData, bool> TurnBased = AccessTools.FieldRefAccess<UnitEntityData, bool>("m_AiEnabledInTurnBased");
+
         [HarmonyPostfix]
         private static void Postfix(UnitEntityData __instance, bool value)
         {
+            RealTime(__instance) = value;
+            TurnBased(__instance) = value;
             if (!value) PartyAiTurns.HandBack(__instance);
         }
     }
