@@ -19,22 +19,36 @@ the player controls waits for the player's commands.
   the character's own AI brain, as it does for enemies and allies, and ends the turn.
 - The game's Limited AI difficulty option restricts these turns as it restricts the party AI in
   real time.
-- Characters whose button is off wait for the player, as in the unmodded game.
-- The flag exists only while the turn runs and is not written to saves.
+- Switching a character's AI off during its AI-played turn (on the action bar or the party
+  portrait) hands the rest of that turn to the player at once.
+- Characters whose button is off wait for the player, as in the unmodded game. With every button
+  off, a turn-based battle runs exactly as without the mod.
+- The flag is released when the turn ends, when combat ends, when the player leaves turn-based
+  mode and when the area is unloaded (loading a save, leaving to the main menu). It is not written
+  to saves; the game does not save during combat.
 
 ## Use
 
-Install Unity Mod Manager for WotR, then add `TurnBasedPartyAI-<version>.zip` in its Mods tab.
-In turn-based mode, switch a character's AI on with the AI button; turn-based mode keeps this
-setting separately from real time.
+Install Unity Mod Manager (0.27.11 or later) for WotR 2.7.0, then add
+`TurnBasedPartyAI-<version>.zip` in its Mods tab. In turn-based mode, switch a character's AI on
+with the AI button on the action bar or its party portrait; turn-based mode keeps this setting
+separately from real time, and it is off by default.
 
 ## Known limitations
 
 - During a character's own AI-played turn the player cannot select or command that character.
-  Switching its AI off takes effect from its next turn.
+- After switching the AI off during that turn, an action the AI had already started (for example a
+  full attack) finishes first. If it used the character's whole round, the turn then ends.
+- Switching the AI on during a turn that waits for the player takes effect from that character's
+  next turn.
+- Some fights force turn-based mode while the game's turn-based setting is off. There the AI
+  button shows the real-time switch, and the mod leaves every turn to the player, as the unmodded
+  game does.
 - What the character does depends on its AI brain, the same one the game uses for it in real time.
-- Verified offline only so far (see Tests). How the game's interface shows the AI button,
-  the selection and the camera during these turns has not been checked in the game.
+- Verified offline only so far (see Tests). Not yet checked in the game: how the AI button, the
+  party portraits, the selection and the camera behave during AI-played turns and after the AI is
+  switched off mid-turn; leaving turn-based mode, loading a save and leaving to the main menu
+  during an AI-played turn; a fight that forces turn-based mode.
 
 ## Build
 
@@ -66,6 +80,17 @@ git submodule update --init external/wotr-testing   # not --recursive
 pwsh -NoProfile -File scripts/Invoke-OfflineTests.ps1
 pwsh -NoProfile -File scripts/Invoke-OfflineTests.ps1 -Runtime netfx   # .NET Framework instead of the game's Mono
 ```
+
+They check that the AI plays the turns of characters whose button is on and only theirs; the
+Limited AI option; switching the AI off during an AI-played turn and on during a player's turn;
+combat ending during an AI-played turn, as when a cutscene ends it or a save is loaded; a fight
+that forces turn-based mode; and that with every button off a seeded battle runs exactly as it
+does with the mod's patches removed.
+
+On .NET Framework the script leaves out the tests marked `Runtime=UnityMono`. A turn-based attack
+by a character the player controls ends the .NET Framework test process, also without this mod.
+Leaving turn-based mode during combat pauses the game, which the offline battles do not run, so
+that case is not covered offline.
 
 Offline results do not replace a check in the game.
 
