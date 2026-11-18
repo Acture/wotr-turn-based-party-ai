@@ -57,7 +57,7 @@ namespace TurnBasedPartyAI.OfflineTests
     }
 
     [Collection("battles")]
-    public sealed class PartyAiTurnTests
+    public sealed partial class PartyAiTurnTests
     {
         private readonly BattleGame game;
 

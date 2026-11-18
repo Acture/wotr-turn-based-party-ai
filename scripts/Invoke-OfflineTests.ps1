@@ -25,6 +25,13 @@ $arguments = @{
     ResultsDirectory = Join-Path $root 'artifacts/test-results/offline'
 }
 if ($WotrInputRoot) { $arguments.WotrInputRoot = $WotrInputRoot }
+if ($Runtime -eq 'netfx') {
+    # On .NET Framework a turn-based attack by a unit the player controls ends the test process, also without this mod
+    # (wotr-testing). Tests that need one carry the trait Runtime=UnityMono and run on the game's Unity Mono only.
+    $unityMonoOnly = 'Runtime!=UnityMono'
+    $Filter = if ($Filter) { "($Filter)&$unityMonoOnly" } else { $unityMonoOnly }
+    Write-Host "netfx: leaving out tests with the trait Runtime=UnityMono (filter: $Filter)."
+}
 if ($Filter) { $arguments.Filter = $Filter }
 & $runner @arguments
 exit $LASTEXITCODE
