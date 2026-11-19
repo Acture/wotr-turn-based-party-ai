@@ -25,7 +25,11 @@ namespace TurnBasedPartyAI
         Companion = 1,
         /// <summary>Animal companions and other pets (<c>UnitEntityData.IsPet</c>).</summary>
         Pet = 2,
-        /// <summary>Summoned creatures (<c>UnitEntityData.IsSummoned</c>, the game's summoned-unit buff).</summary>
+        /// <summary>
+        /// Summoned creatures (<c>UnitEntityData.IsSummoned</c>, the game's summoned-unit buff). The unmodded game never
+        /// lets the player control them, so the game's AI plays their turns whatever their mode; only a mod that makes
+        /// them controllable, such as ToyBox, brings them under these rules.
+        /// </summary>
         Summon = 3,
     }
 
@@ -42,6 +46,15 @@ namespace TurnBasedPartyAI
         private static readonly Dictionary<string, (TurnMode Mode, string Name)> Overrides = new Dictionary<string, (TurnMode, string)>(StringComparer.Ordinal);
 
         internal static TurnMode KindMode(UnitKind kind) => KindModes.TryGetValue(kind, out var mode) ? mode : TurnMode.FollowAiButton;
+
+        /// <summary>
+        /// The kinds the settings page offers a mode for. Summons only when ToyBox has loaded: its "Make Controllable"
+        /// option for summons is what lets the player control them. Without it a mode for summons would change nothing,
+        /// so the page leaves it out and summons keep following the AI button.
+        /// </summary>
+        internal static UnitKind[] KindsInSettings(bool toyBoxLoaded) => toyBoxLoaded
+            ? new[] { UnitKind.MainCharacter, UnitKind.Companion, UnitKind.Pet, UnitKind.Summon }
+            : new[] { UnitKind.MainCharacter, UnitKind.Companion, UnitKind.Pet };
 
         /// <summary>A stored setting as a mode; anything unknown follows the AI button.</summary>
         internal static TurnMode ToMode(int value) => Enum.IsDefined(typeof(TurnMode), value) ? (TurnMode)value : TurnMode.FollowAiButton;

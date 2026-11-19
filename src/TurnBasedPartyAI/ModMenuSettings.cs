@@ -11,9 +11,10 @@ using UnityModManagerNet;
 namespace TurnBasedPartyAI
 {
     /// <summary>
-    /// The mod's page in Mod Menu (Options, Mods): a mode for each kind of unit, and a mode for the characters selected in
-    /// the game. Every reference to Mod Menu's types is in this class, which runs only when Mod Menu has loaded.
-    /// Mod Menu keeps the kinds' modes with the game's settings; the characters' modes are in the mod's own file.
+    /// The mod's page in Mod Menu (Options, Mods): a mode for each kind of unit (summons only with ToyBox), and a mode for
+    /// the characters selected in the game. Every reference to Mod Menu's types is in this class, which runs only when
+    /// Mod Menu has loaded. Mod Menu keeps the kinds' modes with the game's settings; the characters' modes are in the
+    /// mod's own file.
     /// </summary>
     internal static class ModMenuSettings
     {
@@ -61,10 +62,9 @@ namespace TurnBasedPartyAI
                     "在回合制战斗中由游戏自带的 AI 替队员走回合。AI 按钮同时切换即时制和回合制的 AI。"))
                 .AddSubHeader(Strings.Create(Root + ".kinds", "Who plays turn-based turns", "回合制中谁来走回合"), true);
 
-            AddKind(builder, modes, UnitKind.MainCharacter, "Main character", "主角");
-            AddKind(builder, modes, UnitKind.Companion, "Companions (story companions and mercenaries)", "队友（故事队友和佣兵）");
-            AddKind(builder, modes, UnitKind.Pet, "Pets (animal companions and the like)", "宠物（动物伙伴等）");
-            AddKind(builder, modes, UnitKind.Summon, "Summons", "召唤物");
+            // Summons only with ToyBox, whose "Make Controllable" option for summons lets the player control them.
+            var kinds = TurnRules.KindsInSettings(Main.ToyBoxLoaded);
+            foreach (var kind in kinds) AddKind(builder, modes, kind);
 
             builder.AddSubHeader(Strings.Create(Root + ".characters", "Single characters", "单个角色"), true)
                 .AddDropdownButton(DropdownButton.New(Root + ".selected", 0,
@@ -85,19 +85,30 @@ namespace TurnBasedPartyAI
 
             ModMenu.ModMenu.AddSettings(builder);
             // The values Mod Menu kept from earlier sessions; later changes arrive through OnValueChanged.
-            foreach (UnitKind kind in Enum.GetValues(typeof(UnitKind)))
+            foreach (var kind in kinds)
                 TurnRules.SetKindMode(kind, TurnRules.ToMode(ModMenu.ModMenu.GetSettingValue<int>(KindKey(kind))));
             registered = true;
         }
 
-        private static void AddKind(SettingsBuilder builder, List<LocalizedString> modes, UnitKind kind, string english, string chinese)
+        private static void AddKind(SettingsBuilder builder, List<LocalizedString> modes, UnitKind kind)
         {
             var key = KindKey(kind);
+            var (english, chinese) = kind switch
+            {
+                UnitKind.MainCharacter => ("Main character", "主角"),
+                UnitKind.Pet => ("Pets (animal companions and the like)", "宠物（动物伙伴等）"),
+                UnitKind.Summon => ("Summons (with ToyBox)", "召唤物（配合 ToyBox）"),
+                _ => ("Companions (story companions and mercenaries)", "队友（故事队友和佣兵）"),
+            };
+            const string modesEnglish = "Follow the AI button: the AI plays a turn when the character's AI button is on. Always the AI: whatever the button shows. Never the AI: the player plays it, as without the mod. A single character's mode replaces this. Changes take effect from the next turn; switching a character's AI button off during its AI-played turn always gives the rest of that turn to the player.";
+            const string modesChinese = "跟随 AI 按钮：角色的 AI 按钮打开时由 AI 走回合。总是 AI：不管按钮显示什么。从不 AI：由玩家操作，和没装模组时一样。单个角色的设置优先于这里。修改从下一个回合起生效；在角色由 AI 走的回合中关掉它的 AI 按钮，总能立刻把这个回合剩下的部分交还给玩家。";
+            var (longEnglish, longChinese) = kind == UnitKind.Summon
+                ? ("The game does not let the player control summons, so its AI always plays their turns. This mode applies only while ToyBox's \"Make Controllable\" option for summons is on. " + modesEnglish,
+                   "游戏本身不让玩家操控召唤物，它们的回合总是由游戏 AI 走。只有打开 ToyBox 中召唤物的“设为可控”选项时，这里的设置才起作用。" + modesChinese)
+                : (modesEnglish, modesChinese);
             builder.AddDropdownList(DropdownList.New(key, (int)TurnMode.FollowAiButton, Strings.Create(key + ".desc", english, chinese), modes)
                 .OnValueChanged(value => TurnRules.SetKindMode(kind, TurnRules.ToMode(value)))
-                .WithLongDescription(Strings.Create(key + ".long",
-                    "Follow the AI button: the AI plays a turn when the character's AI button is on. Always the AI: whatever the button shows. Never the AI: the player plays it, as without the mod. A single character's mode replaces this. Changes take effect from the next turn; switching a character's AI button off during its AI-played turn always gives the rest of that turn to the player.",
-                    "跟随 AI 按钮：角色的 AI 按钮打开时由 AI 走回合。总是 AI：不管按钮显示什么。从不 AI：由玩家操作，和没装模组时一样。单个角色的设置优先于这里。修改从下一个回合起生效；在角色由 AI 走的回合中关掉它的 AI 按钮，总能立刻把这个回合剩下的部分交还给玩家。")));
+                .WithLongDescription(Strings.Create(key + ".long", longEnglish, longChinese)));
         }
 
         private static List<UnitEntityData> SelectedCharacters()

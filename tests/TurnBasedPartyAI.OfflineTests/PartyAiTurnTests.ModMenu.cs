@@ -34,7 +34,8 @@ namespace TurnBasedPartyAI.OfflineTests
                 return;
             }
 
-            foreach (var kind in new[] { "maincharacter", "companion", "pet", "summon" })
+            // Summons only with ToyBox, which the tests do not load.
+            foreach (var kind in new[] { "maincharacter", "companion", "pet" })
                 Assert.Equal(0, ModMenu.ModMenu.GetSettingValue<int>("turnbasedpartyai.kind." + kind));
             Assert.NotNull(ModMenu.ModMenu.GetSetting<SettingsEntityInt, int>("turnbasedpartyai.selected"));
             Assert.True(ModMenu.ModMenu.SetSetting(CompanionsKey, 1));

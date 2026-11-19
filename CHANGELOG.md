@@ -7,11 +7,12 @@
   wait for the player as before.
 - The AI button switches the AI for real time and turn-based mode together. Fights that the game
   forces into turn-based mode follow the button as it shows there.
-- Optional Mod Menu page: for the main character, companions, pets and summons, "Follow the AI
-  button", "Always the AI" or "Never the AI"; and a mode for single characters, applied to the
-  characters selected in the game, which replaces their kind's. Single characters' modes are kept
-  in `CharacterModes.txt` in the mod's folder, not in saves. If the page cannot be added, the mod
-  logs it and keeps its defaults.
+- Optional Mod Menu page: for the main character, companions and pets, "Follow the AI button",
+  "Always the AI" or "Never the AI"; and a mode for single characters, applied to the characters
+  selected in the game, which replaces their kind's. Summons get a mode only when ToyBox is
+  installed: the game never lets the player control them unless ToyBox's "Make Controllable" option
+  for summons is on. Single characters' modes are kept in `CharacterModes.txt` in the mod's folder,
+  not in saves. If the page cannot be added, the mod logs it and keeps its defaults.
 - The Limited AI difficulty option restricts these turns as it restricts the party AI in real time.
 - Switching a character's AI off during its AI-played turn hands the rest of the turn to the player
   at once, and the button shows it as off. An action the AI had already started finishes first.

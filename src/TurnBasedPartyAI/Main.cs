@@ -65,7 +65,15 @@ namespace TurnBasedPartyAI
         }
 
         /// <summary>Whether Mod Menu has loaded. The mod works without it, with every kind following the AI button.</summary>
-        internal static bool ModMenuLoaded => UnityModManager.FindMod("ModMenu") is { } modMenu && modMenu.Started && !modMenu.ErrorOnLoading;
+        internal static bool ModMenuLoaded => Loaded("ModMenu");
+
+        /// <summary>
+        /// Whether ToyBox has loaded (its Unity Mod Manager id is "0ToyBox0"). The settings page offers a mode for summons
+        /// only then (<see cref="TurnRules.KindsInSettings"/>). Every mod has loaded before the page is added.
+        /// </summary>
+        internal static bool ToyBoxLoaded => Loaded("0ToyBox0");
+
+        private static bool Loaded(string id) => UnityModManager.FindMod(id) is { } mod && mod.Started && !mod.ErrorOnLoading;
     }
 
     /// <summary>

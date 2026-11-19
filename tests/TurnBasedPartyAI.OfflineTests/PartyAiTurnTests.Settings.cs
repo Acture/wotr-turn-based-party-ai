@@ -13,11 +13,11 @@ namespace TurnBasedPartyAI.OfflineTests
 {
     /// <summary>
     /// The mod's TurnRules, reached by reflection: the tests set what the mod's Mod Menu page sets (a mode for each kind
-    /// of unit and for single characters). Mod Menu itself is not loaded offline.
+    /// of unit and for single characters). Mod Menu cannot build the page offline.
     /// </summary>
     internal sealed class ModRules
     {
-        private readonly Type rules, mode, kind;
+        private readonly Type rules, mode, kind, main;
 
         public ModRules(WotrGameFixture game)
         {
@@ -25,6 +25,7 @@ namespace TurnBasedPartyAI.OfflineTests
             rules = mod.GetType("TurnBasedPartyAI.TurnRules", true);
             mode = mod.GetType("TurnBasedPartyAI.TurnMode", true);
             kind = mod.GetType("TurnBasedPartyAI.UnitKind", true);
+            main = mod.GetType("TurnBasedPartyAI.Main", true);
         }
 
         private object Call(string method, params object[] arguments)
@@ -46,6 +47,8 @@ namespace TurnBasedPartyAI.OfflineTests
         public void SaveOverrides(string path) => Call("SaveOverrides", path);
         public int LoadOverrides(string path) => (int)Call("LoadOverrides", path);
         public void Reset() => Call("Reset");
+        public string[] KindsInSettings(bool toyBoxLoaded) => ((Array)Call("KindsInSettings", toyBoxLoaded)).Cast<object>().Select(k => k.ToString()).ToArray();
+        public bool ToyBoxLoaded => (bool)main.GetProperty("ToyBoxLoaded", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
     }
 
     public sealed partial class PartyAiTurnTests
@@ -173,7 +176,8 @@ namespace TurnBasedPartyAI.OfflineTests
             }
 
             // A summoned creature carries the game's summoned-unit buff (ContextActionSpawnMonster applies it), which
-            // UnitEntityData.IsSummoned checks.
+            // UnitEntityData.IsSummoned checks. The game never lets the player control a summon; here the buff is on a
+            // companion, which the player controls, as ToyBox's "Make Controllable" option for summons makes them.
             var summoned = BlueprintRoot.Instance.SystemMechanics.SummonedUnitBuff;
             Assert.NotNull(summoned);
             var scenario = Skirmish();
@@ -193,6 +197,21 @@ namespace TurnBasedPartyAI.OfflineTests
             {
                 rules.Reset();
             }
+        }
+
+        /// <summary>
+        /// Without a mod that lets the player control summons, a mode for them would change nothing: the settings page
+        /// offers one only when ToyBox (Unity Mod Manager id "0ToyBox0") has loaded. The tests do not load ToyBox.
+        /// </summary>
+        [Fact]
+        public void TheSettingsOfferAModeForSummonsOnlyWithToyBox()
+        {
+            game.RequireGame();
+            var rules = new ModRules(game);
+            Assert.DoesNotContain(game.Session.Mods, m => m.Id == "0ToyBox0");
+            Assert.False(rules.ToyBoxLoaded);
+            Assert.Equal(new[] { "MainCharacter", "Companion", "Pet" }, rules.KindsInSettings(false));
+            Assert.Equal(new[] { "MainCharacter", "Companion", "Pet", "Summon" }, rules.KindsInSettings(true));
         }
 
         [Fact]

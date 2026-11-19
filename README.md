@@ -55,12 +55,18 @@ turn-based turns of each kind of character:
 | Main character | The player's character |
 | Companions | Story companions, mercenaries and any other character the player controls that is not one of the others |
 | Pets | Animal companions and other pets |
-| Summons | Summoned creatures |
+| Summons | Summoned creatures. Offered only when [ToyBox](https://github.com/cabarius/ToyBox) is installed (see below) |
 
 Each kind is "Follow the AI button" (the default), "Always the AI" or "Never the AI". Under
 "Single characters", select characters in the game, choose a mode and apply it: it replaces their
 kind's mode for them ("As its kind" removes it). "Show" tells the modes of the selected
 characters, "Remove" removes every single character's mode.
+
+The game never lets the player control summons: its AI plays their turns, with or without this
+mod, so a mode for them changes nothing in the unmodded game. ToyBox's "Make Controllable" option
+for summons lets the player control them; while it is on, summons follow the mode for summons and
+their own modes like any other character. The page offers that mode only when ToyBox is installed.
+Without it, summons follow the AI button.
 
 The kinds' modes are kept with the game's settings. Single characters' modes are kept in
 `CharacterModes.txt` in the mod's folder, for every save of the same playthrough; they are not
@@ -80,10 +86,10 @@ kind follows the AI button.
 - What the character does depends on its AI brain, the same one the game uses for it in real time.
 - Verified offline only so far (see Tests). Not yet checked in the game: the Mod Menu page (its
   texts, applying modes to selected characters, the messages it shows, keeping the settings over a
-  restart); how the AI button, the party portraits, the selection and the camera behave during
-  AI-played turns and after the AI is switched off mid-turn; leaving turn-based mode, loading a
-  save and leaving to the main menu during an AI-played turn; a fight that forces turn-based mode;
-  pets.
+  restart); summons made controllable with ToyBox; how the AI button, the party portraits, the
+  selection and the camera behave during AI-played turns and after the AI is switched off
+  mid-turn; leaving turn-based mode, loading a save and leaving to the main menu during an
+  AI-played turn; a fight that forces turn-based mode; pets.
 
 ## Build
 
@@ -122,11 +128,11 @@ The package checks every run (no tests, missing reports or a different runtime f
 its environment reports under `artifacts/bin/TurnBasedPartyAI.OfflineTests/`.
 
 They check that the AI plays the turns it is to play and only those; the AI button switching both
-modes; each kind's mode, single characters' modes and how the mod sorts characters into kinds; the
-Limited AI option; switching the AI off during an AI-played turn and on during a player's turn;
-combat ending during an AI-played turn, as when a cutscene ends it or a save is loaded; a fight
-that forces turn-based mode; and that with every button off a seeded battle runs exactly as it
-does with the mod's patches removed.
+modes; each kind's mode, single characters' modes, how the mod sorts characters into kinds and that
+the page offers a mode for summons only with ToyBox; the Limited AI option; switching the AI off
+during an AI-played turn and on during a player's turn; combat ending during an AI-played turn, as
+when a cutscene ends it or a save is loaded; a fight that forces turn-based mode; and that with
+every button off a seeded battle runs exactly as it does with the mod's patches removed.
 
 Mod Menu builds its pages from Unity objects, which do not exist offline, so the page itself is
 not built in the tests: they check that the mod then logs it and keeps working, and set the modes
