@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.0.1 - 2026-11-21
+
 - The game's AI plays the turn-based turns of party members whose AI button is on, through the
   game's own `PreventDirectControl` flag for the length of the turn. Characters with the button off
   wait for the player as before.

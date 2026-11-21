@@ -1,0 +1,55 @@
+[b]Turn-Based Party AI[/b]
+Let the game's own AI play your party members' turns in turn-based combat.
+
+In real time, the AI button lets the game's AI fight for a party member. Turn-based mode keeps its own setting of that button, but the unmodded game never acts on it: every turn of a character you control waits for your commands. With this mod the AI button works in turn-based mode too. Characters whose button is off wait for you as before.
+
+[b]Version 0.0.1 — Early preview[/b]
+The first public version. It has been played through the prologue's opening dungeon with a large mod list. Please report anything that looks wrong, with the situation, your settings, the game version and your other mods.
+
+[b]Features[/b]
+[list]
+[*]The AI button (on the action bar or a party portrait) works in turn-based combat, and switches the AI for real time and turn-based mode together.
+[*]The game's own AI plays the turn, with the character's own AI brain — the same one it uses for that character in real time. The Limited AI difficulty option applies as in real time.
+[*]Switch a character's AI off during its turn and the rest of that turn is yours at once.
+[*]Settings for the main character, companions and pets (and summons with ToyBox): Follow the AI button, Always the AI, or Never the AI. Single characters can have their own mode.
+[*]Settings in Unity Mod Manager's window; with Mod Menu, also in the game's options. Both show the same values.
+[*]Nothing is written to your saves. With every AI button off and the default settings, turn-based combat runs exactly as without the mod.
+[/list]
+
+[b]How to use[/b]
+In turn-based combat, switch a character's AI on with the AI button. From that character's next turn the AI plays its turns until you switch it off again.
+
+By default nothing changes until you switch a character's AI on in turn-based mode. Two cases look as if it were on by default:
+[list]
+[*]If you clicked a character's AI button in turn-based mode before installing the mod, the game saved it as on (the unmodded game ignores it). The AI plays that character's turns right away; the button shows it as on.
+[*]In a fight the game forces into turn-based mode while you play in real time, the button shows the real-time switch, which is on unless you switched it off.
+[/list]
+
+[b]Installation[/b]
+[list=1]
+[*]Install Unity Mod Manager (0.27.11 or later) for Pathfinder: Wrath of the Righteous 2.7.0.
+[*]Download TurnBasedPartyAI-0.0.1.zip and install it through Unity Mod Manager's Mods tab.
+[*]Open the settings in Unity Mod Manager's window (Ctrl+F10, the mod's row).
+[/list]
+Requires game version 2.7.0. No other mod is required. Mod Menu (tested with 2.0.14) is optional and adds the settings to the game's options. ToyBox is needed only for summons. To uninstall, disable or remove the mod in Unity Mod Manager; your saves do not depend on it.
+
+[b]Summons[/b]
+The game never lets you control summons: its AI plays their turns with or without this mod. ToyBox's "Make Controllable" option for summons lets you control them; while it is on, summons follow this mod's setting for summons. The setting for summons appears only when ToyBox is installed.
+
+[b]Known limits[/b]
+[list]
+[*]During a character's AI-played turn you cannot select or command that character.
+[*]After you switch the AI off during that turn, an action the AI had already started (a full attack, for example) finishes first.
+[*]Switching the AI on, or changing a setting, takes effect from the character's next turn.
+[*]What a character does depends on its AI brain; the mod does not change how the game's AI chooses.
+[*]Not yet checked in the game: summons made controllable with ToyBox, pets, fights that force turn-based mode, and leaving turn-based mode, loading a save or leaving to the main menu during an AI-played turn.
+[/list]
+
+[b]中文简介[/b]
+回合制队伍 AI：在回合制战斗中，由游戏自带的 AI 替打开了 AI 按钮的队员走回合，和即时制里一样。AI 按钮同时切换即时制和回合制。默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走；在它的回合中关掉 AI，剩下的部分立刻交还给你。设置在 Unity Mod Manager 窗口（Ctrl+F10）中，装了 Mod Menu 时游戏选项里也有：可以按主角、队友、宠物（装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。不写入存档。注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。需要游戏版本 2.7.0。
+
+[b]Source and support[/b]
+[url=https://github.com/Acture/wotr-turn-based-party-ai]GitHub[/url]
+[url=https://github.com/Acture/wotr-turn-based-party-ai/issues]Report an issue[/url]
+
+Source license: AGPL-3.0. Game files are not included.
