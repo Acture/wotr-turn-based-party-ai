@@ -26,7 +26,10 @@ turn-based mode too. Characters whose button is off wait for you as before.
 
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) (0.27.11 or later) for
    Wrath of the Righteous 2.7.0.
-2. Add `TurnBasedPartyAI-<version>.zip` in Unity Mod Manager's Mods tab.
+2. Download `TurnBasedPartyAI-<version>.zip` from
+   [Nexus Mods](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/1278) or the
+   [GitHub releases](https://github.com/Acture/wotr-turn-based-party-ai/releases), and add it in
+   Unity Mod Manager's Mods tab.
 3. Optional: [Mod Menu](https://github.com/WittleWolfie/ModMenu/releases) (tested with 2.0.14) puts
    the settings in the game's options too. [ToyBox](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/8)
    is needed only for summons (see Settings).
@@ -104,6 +107,9 @@ Changes take effect from each character's next turn. The settings are kept in th
 回合制队伍 AI：在回合制战斗中，由游戏自带的 AI 替打开了 AI 按钮的队员走回合，和即时制里一样。原版游戏在回合制下
 虽然保留了 AI 按钮的设置，却从不使用它。本模组让 AI 按钮在回合制下也生效，并且同时切换即时制和回合制。
 
+下载：[Nexus Mods](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/1278) 或
+[GitHub Releases](https://github.com/Acture/wotr-turn-based-party-ai/releases)，在 Unity Mod Manager 的 Mods 页添加 zip。
+
 - 默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走。在它的回合中关掉 AI，剩下的部分立刻交还给你。
 - 设置在 Unity Mod Manager 窗口（Ctrl+F10）中；装了 Mod Menu 时，游戏选项里也有同样的设置。可以按主角、队友、宠物
   （装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。
@@ -177,6 +183,11 @@ filter. Leaving turn-based mode during combat pauses the game, which the offline
 run, so that case is not covered offline.
 
 Offline results do not replace a check in the game.
+
+GitHub Actions runs only the repository checks, `python tests/check_repository.py` and its tests:
+no game files or build output are tracked, Info.json, the project, the changelog and the Nexus Mods
+description name the same version, and links work. Building the mod and the offline tests need the
+game's assemblies, so they run on a machine with the game installed.
 
 ## License
 
