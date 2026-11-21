@@ -12,18 +12,25 @@ namespace TurnBasedPartyAI
         /// <summary>The single characters' modes (<see cref="TurnRules"/>), in the mod's folder; not in saves.</summary>
         private const string OverridesFileName = "CharacterModes.txt";
 
+        /// <summary>The kinds' modes (<see cref="TurnRules"/>), in the mod's folder.</summary>
+        private const string KindModesFileName = "KindModes.txt";
+
         internal static UnityModManager.ModEntry Entry;
         internal static UnityModManager.ModEntry.ModLogger Logger;
+
+        /// <summary>Whether the kinds' modes came from the mod's file when it loaded (see <see cref="ModMenuSettings"/>).</summary>
+        internal static bool KindModesSaved;
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             Entry = modEntry;
             Logger = modEntry.Logger;
-            LoadOverrides();
+            LoadSettings();
             var harmony = new Harmony(modEntry.Info.Id);
             try
             {
                 harmony.PatchAll(typeof(Main).Assembly);
+                modEntry.OnGUI = UmmSettings.OnGUI;
                 return true;
             }
             catch (Exception e)
@@ -37,13 +44,24 @@ namespace TurnBasedPartyAI
             }
         }
 
-        private static void LoadOverrides()
+        private static void LoadSettings()
         {
             try
             {
                 TurnRules.OverridesFile = Path.Combine(Entry.Path, OverridesFileName);
                 var skipped = TurnRules.LoadOverrides(TurnRules.OverridesFile);
                 if (skipped > 0) Logger.Warning($"{OverridesFileName}: skipped {skipped} lines that could not be read.");
+            }
+            catch (Exception e)
+            {
+                Logger.LogException(e);
+            }
+            try
+            {
+                TurnRules.KindModesFile = Path.Combine(Entry.Path, KindModesFileName);
+                KindModesSaved = File.Exists(TurnRules.KindModesFile);
+                var skipped = TurnRules.LoadKindModes(TurnRules.KindModesFile);
+                if (skipped > 0) Logger.Warning($"{KindModesFileName}: skipped {skipped} lines that could not be read.");
             }
             catch (Exception e)
             {
@@ -64,7 +82,39 @@ namespace TurnBasedPartyAI
             }
         }
 
-        /// <summary>Whether Mod Menu has loaded. The mod works without it, with every kind following the AI button.</summary>
+        internal static void SaveKindModes()
+        {
+            if (TurnRules.KindModesFile == null) return;
+            try
+            {
+                TurnRules.SaveKindModes(TurnRules.KindModesFile);
+                KindModesSaved = true;
+            }
+            catch (Exception e)
+            {
+                Logger?.LogException(e);
+            }
+        }
+
+        /// <summary>Shows a kind's mode chosen in the Unity Mod Manager panel on the Mod Menu page, if there is one.</summary>
+        internal static void ShowOnModMenuPage(UnitKind kind, TurnMode mode)
+        {
+            if (!ModMenuLoaded) return;
+            try
+            {
+                ShowOnModMenuPageWithModMenu(kind, mode);
+            }
+            catch (Exception e)
+            {
+                Logger?.LogException(e);
+            }
+        }
+
+        // Kept apart, so that Mod Menu's types are loaded only when Mod Menu is there.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ShowOnModMenuPageWithModMenu(UnitKind kind, TurnMode mode) => ModMenuSettings.Show(kind, mode);
+
+        /// <summary>Whether Mod Menu has loaded. The mod works without it; its settings are in Unity Mod Manager's window too.</summary>
         internal static bool ModMenuLoaded => Loaded("ModMenu");
 
         /// <summary>
@@ -93,7 +143,7 @@ namespace TurnBasedPartyAI
             }
             catch (Exception e)
             {
-                Main.Logger?.Error("Mod Menu settings could not be added; every kind follows the AI button.");
+                Main.Logger?.Error("Mod Menu settings could not be added; the settings are in Unity Mod Manager's window.");
                 Main.Logger?.LogException(e);
             }
         }

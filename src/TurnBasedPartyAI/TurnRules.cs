@@ -34,9 +34,9 @@ namespace TurnBasedPartyAI
     }
 
     /// <summary>
-    /// Decides who plays a turn: a mode set for the unit itself, otherwise its kind's mode. Mod Menu sets both when it is
-    /// installed (<see cref="ModMenuSettings"/> passes every change on); without it every kind follows the AI button and
-    /// only overrides saved earlier apply. Changes take effect from the next turn that starts.
+    /// Decides who plays a turn: a mode set for the unit itself, otherwise its kind's mode. The player sets both in the
+    /// mod's Unity Mod Manager panel or its Mod Menu page (<see cref="PlayerSettings"/>); both are kept in the mod's
+    /// folder. Changes take effect from the next turn that starts.
     /// </summary>
     internal static class TurnRules
     {
@@ -48,9 +48,9 @@ namespace TurnBasedPartyAI
         internal static TurnMode KindMode(UnitKind kind) => KindModes.TryGetValue(kind, out var mode) ? mode : TurnMode.FollowAiButton;
 
         /// <summary>
-        /// The kinds the settings page offers a mode for. Summons only when ToyBox has loaded: its "Make Controllable"
-        /// option for summons is what lets the player control them. Without it a mode for summons would change nothing,
-        /// so the page leaves it out and summons keep following the AI button.
+        /// The kinds the settings offer a mode for. Summons only when ToyBox has loaded: its "Make Controllable" option
+        /// for summons is what lets the player control them. Without it a mode for summons would change nothing, so the
+        /// settings leave it out.
         /// </summary>
         internal static UnitKind[] KindsInSettings(bool toyBoxLoaded) => toyBoxLoaded
             ? new[] { UnitKind.MainCharacter, UnitKind.Companion, UnitKind.Pet, UnitKind.Summon }
@@ -61,6 +61,9 @@ namespace TurnBasedPartyAI
 
         /// <summary>Where overrides are saved; null keeps them in memory only.</summary>
         internal static string OverridesFile;
+
+        /// <summary>Where the kinds' modes are saved; null keeps them in memory only.</summary>
+        internal static string KindModesFile;
 
         internal static UnitKind Classify(UnitEntityData unit)
         {
@@ -98,6 +101,13 @@ namespace TurnBasedPartyAI
 
         internal static int OverrideCount => Overrides.Count;
 
+        /// <summary>Every unit's own mode, with the name the unit had when it was set, in the order of the names.</summary>
+        internal static List<(string Id, TurnMode Mode, string Name)> OverrideList()
+            => Overrides.Select(e => (Id: e.Key, e.Value.Mode, e.Value.Name))
+                .OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase).ThenBy(e => e.Id, StringComparer.Ordinal).ToList();
+
+        internal static void RemoveOverride(string id) => Overrides.Remove(id);
+
         internal static void ClearOverrides() => Overrides.Clear();
 
         /// <summary>Back to the defaults: every kind follows the AI button, no overrides, nothing saved.</summary>
@@ -109,9 +119,38 @@ namespace TurnBasedPartyAI
 
         /// <summary>Saves the overrides, one per line: unique id, mode, name. Units of every save share the file.</summary>
         internal static void SaveOverrides(string path)
+            => WriteLines(path, Overrides.OrderBy(e => e.Key, StringComparer.Ordinal)
+                .Select(e => $"{e.Key}\t{e.Value.Mode}\t{e.Value.Name?.Replace('\t', ' ').Replace('\n', ' ')}"));
+
+        /// <summary>Saves every kind's mode, one per line: kind, mode.</summary>
+        internal static void SaveKindModes(string path)
+            => WriteLines(path, Enum.GetValues(typeof(UnitKind)).Cast<UnitKind>().Select(kind => $"{kind}\t{KindMode(kind)}"));
+
+        /// <summary>
+        /// Replaces the kinds' modes with the file's; a kind it does not name follows the AI button. Lines that cannot be
+        /// read are skipped and counted.
+        /// </summary>
+        internal static int LoadKindModes(string path)
         {
-            var lines = Overrides.OrderBy(e => e.Key, StringComparer.Ordinal)
-                .Select(e => $"{e.Key}\t{e.Value.Mode}\t{e.Value.Name?.Replace('\t', ' ').Replace('\n', ' ')}");
+            KindModes.Clear();
+            if (!File.Exists(path)) return 0;
+            var skipped = 0;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                var parts = line.Split('\t');
+                if (parts.Length == 2 && Enum.TryParse(parts[0], out UnitKind kind) && Enum.IsDefined(typeof(UnitKind), kind)
+                    && Enum.TryParse(parts[1], out TurnMode mode) && Enum.IsDefined(typeof(TurnMode), mode))
+                    KindModes[kind] = mode;
+                else
+                    skipped++;
+            }
+            return skipped;
+        }
+
+        /// <summary>Writes a temporary file first, so that a failure leaves the old file whole.</summary>
+        private static void WriteLines(string path, IEnumerable<string> lines)
+        {
             var temporary = path + ".tmp";
             File.WriteAllLines(temporary, lines);
             if (File.Exists(path)) File.Delete(path);

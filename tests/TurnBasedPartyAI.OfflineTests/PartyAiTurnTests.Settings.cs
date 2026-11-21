@@ -46,6 +46,9 @@ namespace TurnBasedPartyAI.OfflineTests
         public string Classify(UnitEntityData unit) => Call("Classify", unit).ToString();
         public void SaveOverrides(string path) => Call("SaveOverrides", path);
         public int LoadOverrides(string path) => (int)Call("LoadOverrides", path);
+        public string KindMode(string unitKind) => Call("KindMode", Enum.Parse(kind, unitKind)).ToString();
+        public void SaveKindModes(string path) => Call("SaveKindModes", path);
+        public int LoadKindModes(string path) => (int)Call("LoadKindModes", path);
         public void Reset() => Call("Reset");
         public string[] KindsInSettings(bool toyBoxLoaded) => ((Array)Call("KindsInSettings", toyBoxLoaded)).Cast<object>().Select(k => k.ToString()).ToArray();
         public bool ToyBoxLoaded => (bool)main.GetProperty("ToyBoxLoaded", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
