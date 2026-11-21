@@ -89,11 +89,12 @@ Changes take effect from each character's next turn. The settings are kept in th
   game starts; Unity Mod Manager's window lists them. A summon's own mode lasts as long as that
   summon: a new summon is a new character.
 - What a character does depends on its AI brain. The mod does not change how the game's AI chooses.
-- Played in the game so far through the prologue's opening dungeon, with a large mod list (Mod Menu,
-  ToyBox and TabletopTweaks among others), without problems. Not yet checked in the game: summons
-  made controllable with ToyBox, pets, a fight that forces turn-based mode, and leaving turn-based
-  mode, loading a save or leaving to the main menu during an AI-played turn. Please report what you
-  find.
+- Only lightly tested in the game so far, at the start of the first chapter, with a large mod list
+  (Mod Menu, ToyBox and TabletopTweaks among others): companions' turns played by the AI and the
+  settings in Unity Mod Manager's window worked without problems. Not yet checked in the game:
+  switching the AI off during an AI-played turn, the Mod Menu page, summons made controllable with
+  ToyBox, pets, a fight that forces turn-based mode, and leaving turn-based mode, loading a save or
+  leaving to the main menu during an AI-played turn. Please report what you find.
 
 ## 中文说明
 
@@ -105,6 +106,7 @@ Changes take effect from each character's next turn. The settings are kept in th
   （装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。
 - 不写入存档。所有 AI 按钮都关、设置为默认时，回合制战斗和没装模组时完全一样。
 - 注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。
+- 目前只在游戏里浅浅测了第一章开头：AI 替队友走回合、UMM 设置面板都正常。其余情况还没在游戏里测过，欢迎反馈。
 
 ## Build
 
@@ -174,4 +176,6 @@ Offline results do not replace a check in the game.
 
 ## License
 
-[GNU Affero General Public License v3.0](LICENSE). Game files are not included.
+[GNU Affero General Public License v3.0](LICENSE), with an
+[additional permission](LICENSE-EXCEPTION.md) to link and convey it together with the proprietary
+game and Unity engine assemblies. Game files are not included.
