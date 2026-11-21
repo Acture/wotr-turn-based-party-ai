@@ -18,8 +18,9 @@ turn-based mode too. Characters whose button is off wait for you as before.
   ToyBox: follow the AI button, always the AI, or never the AI. You can also give single characters
   their own mode.
 - Settings in Unity Mod Manager's window, and also on a page in the game's options with Mod Menu.
-- Nothing is written to your saves. With every AI button off and the default settings, turn-based
-  combat runs exactly as without the mod.
+- The mod keeps none of its own data in your saves; the AI buttons are the game's own switches,
+  which the game saves. With every AI button off and the default settings, turn-based combat runs
+  exactly as without the mod.
 
 ## Install
 
@@ -30,7 +31,9 @@ turn-based mode too. Characters whose button is off wait for you as before.
    the settings in the game's options too. [ToyBox](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/8)
    is needed only for summons (see Settings).
 
-To uninstall, disable or remove the mod in Unity Mod Manager. Your saves do not depend on it.
+To uninstall, disable or remove the mod in Unity Mod Manager. Your saves do not depend on it, but
+the AI buttons stay as you last set them: a character whose AI you switched off in turn-based mode
+with the mod has it off in real time too, until you switch it on again.
 
 ## Use
 
@@ -104,7 +107,8 @@ Changes take effect from each character's next turn. The settings are kept in th
 - 默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走。在它的回合中关掉 AI，剩下的部分立刻交还给你。
 - 设置在 Unity Mod Manager 窗口（Ctrl+F10）中；装了 Mod Menu 时，游戏选项里也有同样的设置。可以按主角、队友、宠物
   （装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。
-- 不写入存档。所有 AI 按钮都关、设置为默认时，回合制战斗和没装模组时完全一样。
+- 模组自己的数据不写入存档；AI 按钮的开关是游戏自己的，由游戏保存，卸载后保持你最后的设置（装着模组时在回合制里关掉的 AI，
+  即时制里也是关的，需要时手动打开）。所有 AI 按钮都关、设置为默认时，回合制战斗和没装模组时完全一样。
 - 注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。
 - 目前只在游戏里浅浅测了第一章开头：AI 替队友走回合、UMM 设置面板都正常。其余情况还没在游戏里测过，欢迎反馈。
 
