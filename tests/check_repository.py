@@ -11,7 +11,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
 
 MOD: str = "TurnBasedPartyAI"
@@ -58,6 +58,8 @@ BINARY_SUFFIXES: frozenset[str] = frozenset(
 	}
 )
 LINK: re.Pattern[str] = re.compile(r"\[[^\]\n]*\]\((<[^>\n]+>|[^\s)]+)(?:\s+\"[^\"]*\")?\)")
+# A reference definition, "[label]: destination"; "[^1]: ..." is a footnote, not a link.
+REFERENCE: re.Pattern[str] = re.compile(r"^ {0,3}\[(?!\^)[^\]\n]+\]:\s*(<[^>\n]+>|\S+)")
 
 
 @dataclass(frozen=True)
@@ -98,13 +100,63 @@ def project_property(project: str, name: str) -> str | None:
 	return match[1].strip() if match else None
 
 
+def block_end(text: str, start: int, end: int) -> int:
+	"""Index just past the brace block opening at text[start]; the sources keep braces balanced."""
+	depth: int = 0
+	for index in range(start, end):
+		if text[index] == "{":
+			depth += 1
+		elif text[index] == "}":
+			depth -= 1
+			if depth == 0:
+				return index + 1
+	return end
+
+
+def depth_between(text: str, start: int, end: int) -> int:
+	return text.count("{", start, end) - text.count("}", start, end)
+
+
+def entry_point_exists(sources: list[str], entry: str) -> bool:
+	"""Whether a source declares `public static bool Method(` as a member of Namespace.Class."""
+	parts: list[str] = entry.split(".")
+	if len(parts) < 3:
+		return False
+	namespace_name, class_name, method_name = ".".join(parts[:-2]), parts[-2], parts[-1]
+	namespace: re.Pattern[str] = re.compile(rf"\bnamespace\s+{re.escape(namespace_name)}\s*([;{{])")
+	declaration: re.Pattern[str] = re.compile(rf"\bclass\s+{re.escape(class_name)}\b[^{{;]*\{{")
+	method: re.Pattern[str] = re.compile(
+		rf"\bpublic\s+static\s+bool\s+{re.escape(method_name)}\s*\("
+	)
+	for source in sources:
+		for scope in namespace.finditer(source):
+			start: int = scope.end()
+			end: int = block_end(source, start - 1, len(source)) if scope[1] == "{" else len(source)
+			for found in declaration.finditer(source, start, end):
+				if depth_between(source, start, found.start()) != 0:
+					continue  # a nested class: Outer.Class, not Namespace.Class
+				body_end: int = block_end(source, found.end() - 1, end)
+				members: list[str] = []  # the class body without method bodies and nested types
+				depth: int = 0
+				for char in source[found.end() : body_end - 1]:
+					if char == "{":
+						depth += 1
+					elif char == "}":
+						depth -= 1
+					elif depth == 0:
+						members.append(char)
+				if method.search("".join(members)):
+					return True
+	return False
+
+
 def metadata_errors(
 	info: dict[str, object],
 	project: str,
 	changelog: str,
 	readme: str,
 	nexus: str,
-	sources: str,
+	sources: list[str],
 	tag: str | None,
 ) -> list[str]:
 	"""Check Info.json against the project, its entry point and the public texts."""
@@ -129,12 +181,7 @@ def metadata_errors(
 	if project_property(project, "AssemblyName") != MOD:
 		errors.append(f"The project's AssemblyName must be {MOD!r}")
 	entry: object = info.get("EntryMethod")
-	parts: list[str] = entry.split(".") if isinstance(entry, str) else []
-	if len(parts) < 3 or not (
-		re.search(rf"\bnamespace\s+{re.escape('.'.join(parts[:-2]))}\b", sources)
-		and re.search(rf"\bclass\s+{re.escape(parts[-2])}\b", sources)
-		and re.search(rf"\bpublic\s+static\s+bool\s+{re.escape(parts[-1])}\s*\(", sources)
-	):
+	if not isinstance(entry, str) or not entry_point_exists(sources, entry):
 		errors.append(f"Info.json EntryMethod {entry!r} is not a public static bool method")
 	if not re.search(r"^## Unreleased\s*$", changelog, re.MULTILINE):
 		errors.append("CHANGELOG.md needs an '## Unreleased' section")
@@ -155,8 +202,12 @@ def metadata_errors(
 
 
 def link_errors(root: Path, entries: list[Entry]) -> list[str]:
-	"""Relative links in tracked Markdown files must point at files in the repository."""
+	"""Relative links in tracked Markdown files must point at tracked files or folders."""
 	errors: list[str] = []
+	tracked: set[str] = {entry.path for entry in entries}
+	folders: set[str] = {
+		parent.as_posix() for path in tracked for parent in PurePosixPath(path).parents
+	}
 	for entry in entries:
 		if not entry.path.endswith(".md"):
 			continue
@@ -169,12 +220,19 @@ def link_errors(root: Path, entries: list[Entry]) -> list[str]:
 				continue
 			if fence is not None:
 				continue
-			for match in LINK.finditer(line):
-				url = urlsplit(match[1].strip("<>"))
+			destinations: list[str] = [match[1] for match in LINK.finditer(line)]
+			definition: re.Match[str] | None = REFERENCE.match(line)
+			if definition:
+				destinations.append(definition[1])
+			for destination in destinations:
+				url = urlsplit(destination.strip("<>"))
 				if url.scheme or url.netloc or not url.path or url.path.startswith("/"):
 					continue
 				target: Path = (file.parent / unquote(url.path)).resolve()
-				if not target.is_relative_to(root) or not target.exists():
+				relative: str | None = (
+					target.relative_to(root).as_posix() if target.is_relative_to(root) else None
+				)
+				if relative is None or (relative not in tracked and relative not in folders):
 					errors.append(f"Broken link: {entry.path} -> {url.path}")
 	return errors
 
@@ -211,11 +269,11 @@ def check_repository(root: Path, tag: str | None = None) -> list[str]:
 		def read(name: str) -> str:
 			return (root / name).read_text(encoding="utf-8")
 
-		sources: str = "\n".join(
+		sources: list[str] = [
 			read(entry.path)
 			for entry in entries
 			if entry.path.startswith(f"src/{MOD}/") and entry.path.endswith(".cs")
-		)
+		]
 		errors += metadata_errors(
 			json.loads(read(INFO)),
 			read(PROJECT),

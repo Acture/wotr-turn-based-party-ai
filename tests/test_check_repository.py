@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from check_repository import (
 	Entry,
 	boundary_errors,
 	check_repository,
+	entry_point_exists,
+	link_errors,
 	metadata_errors,
 )
 
@@ -53,11 +56,11 @@ class MetadataTests(unittest.TestCase):
 			"changelog": read("CHANGELOG.md"),
 			"readme": read("README.md"),
 			"nexus": read(NEXUS_DESCRIPTION),
-			"sources": read("src/TurnBasedPartyAI/Main.cs"),
 		}
+		self.sources: list[str] = [read("src/TurnBasedPartyAI/Main.cs")]
 
 	def errors(self, tag: str | None = None) -> list[str]:
-		return metadata_errors(self.info, tag=tag, **self.texts)
+		return metadata_errors(self.info, tag=tag, sources=self.sources, **self.texts)
 
 	def test_the_current_metadata_passes(self) -> None:
 		version: object = self.info["Version"]
@@ -81,6 +84,68 @@ class MetadataTests(unittest.TestCase):
 	def test_another_author_is_caught(self) -> None:
 		self.info["Author"] = "AC"
 		self.assertTrue(any("Author" in error for error in self.errors()))
+
+
+class EntryPointTests(unittest.TestCase):
+	ENTRY: str = "TurnBasedPartyAI.Main.Load"
+
+	def test_a_method_of_the_named_class_is_found(self) -> None:
+		block: str = (
+			"namespace TurnBasedPartyAI\n{\n    public static class Main\n    {\n"
+			"        public static bool Load(object entry)\n        {\n"
+			'            var text = $"{entry}";\n            return true;\n        }\n    }\n}\n'
+		)
+		file_scoped: str = (
+			"namespace TurnBasedPartyAI;\npublic static class Main\n{\n"
+			"    public static bool Load(object entry) => true;\n}\n"
+		)
+		self.assertTrue(entry_point_exists([block], self.ENTRY))
+		self.assertTrue(entry_point_exists(["// other file", file_scoped], self.ENTRY))
+
+	def test_a_method_of_another_class_or_namespace_is_not(self) -> None:
+		other_class: str = (
+			"namespace TurnBasedPartyAI {\n    class Main {}\n    class Helper {\n"
+			"        public static bool Load() => true;\n    }\n}\n"
+		)
+		nested: str = (
+			"namespace TurnBasedPartyAI {\n    class Outer {\n        class Main {\n"
+			"            public static bool Load() => true;\n        }\n    }\n}\n"
+		)
+		local: str = (
+			"namespace TurnBasedPartyAI {\n    class Main {\n        void Run() {\n"
+			"            public static bool Load() => true;\n        }\n    }\n}\n"
+		)
+		other_namespace: str = (
+			"namespace Other {\n    class Main {\n        public static bool Load() => true;\n"
+			"    }\n}\n"
+		)
+		for source in (other_class, nested, local, other_namespace):
+			self.assertFalse(entry_point_exists([source], self.ENTRY), source)
+
+
+class LinkTests(unittest.TestCase):
+	def test_links_must_reach_tracked_files_or_folders(self) -> None:
+		with tempfile.TemporaryDirectory() as folder:
+			root: Path = Path(folder).resolve()
+			(root / "docs").mkdir()
+			(root / "docs" / "local.md").write_text("untracked\n", encoding="utf-8")
+			(root / "README.md").write_text(
+				"[license](LICENSE) [docs](docs/) [guide][guide] [local](docs/local.md)\n"
+				"[outside](../x.md) [site](https://example.com) [^1]\n\n"
+				"[guide]: docs/missing.md\n[^1]: A footnote, not a link.\n",
+				encoding="utf-8",
+			)
+			entries: list[Entry] = [
+				Entry("100644", path) for path in ("README.md", "LICENSE", "docs/usage.txt")
+			]
+			self.assertEqual(
+				link_errors(root, entries),
+				[
+					"Broken link: README.md -> docs/local.md",
+					"Broken link: README.md -> ../x.md",
+					"Broken link: README.md -> docs/missing.md",
+				],
+			)
 
 
 if __name__ == "__main__":
