@@ -184,6 +184,11 @@ run, so that case is not covered offline.
 
 Offline results do not replace a check in the game.
 
+GitHub Actions runs only the repository checks, `python tests/check_repository.py` and its tests:
+no game files or build output are tracked, Info.json, the project, the changelog and the Nexus Mods
+description name the same version, and links work. Building the mod and the offline tests need the
+game's assemblies, so they run on a machine with the game installed.
+
 ## License
 
 [GNU Affero General Public License v3.0](LICENSE), with an
