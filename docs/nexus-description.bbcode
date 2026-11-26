@@ -1,54 +1,66 @@
-[b]Turn-Based Party AI[/b]
-Let the game's own AI play your party members' turns in turn-based combat.
+[size=4][b]Turn-Based Party AI[/b][/size]
+Let Pathfinder: Wrath of the Righteous's own AI take turns for the party members and pets you choose in turn-based combat—so you do not have to micro-manage every routine fight, while keeping instant control over any character whenever you want.
 
-In real time, the AI button lets the game's AI fight for a party member. Turn-based mode keeps its own setting of that button, but the unmodded game never acts on it: every turn of a character you control waits for your commands. With this mod the AI button works in turn-based mode too. Characters whose button is off wait for you as before.
+In real time, the AI button lets the game's AI fight for a party member. Turn-based mode saves its own state for that button, but the unmodded game (2.7.0) never acts on it: every turn of a character you control still waits for your commands. With this mod, the AI button works in turn-based mode too. Characters whose button is off wait for you as before.
 
 [b]Version 0.0.1 — Early preview[/b]
-The first public version, only lightly tested in the game so far: at the start of the first chapter, with a large mod list, companions' turns played by the AI and the settings in Unity Mod Manager's window worked. Please report anything that looks wrong, with the situation, your settings, the game version and your other mods.
+The first public version, only lightly tested in the game so far: at the start of the first chapter, with a large mod list (Mod Menu, ToyBox and TabletopTweaks among others), companions' turns played by the AI and the settings in Unity Mod Manager's window worked without problems. Please report anything that looks wrong, with the situation, your settings, the game version and your other mods.
 
-[b]Features[/b]
+[size=3][b]Features[/b][/size]
 [list]
-[*]The AI button (on the action bar or a party portrait) works in turn-based combat, and switches the AI for real time and turn-based mode together.
-[*]The game's own AI plays the turn, with the character's own AI brain — the same one it uses for that character in real time. The Limited AI difficulty option applies as in real time.
-[*]Switch a character's AI off during its turn and the rest of that turn is yours at once.
-[*]Settings for the main character, companions and pets (and summons with ToyBox): Follow the AI button, Always the AI, or Never the AI. Single characters can have their own mode.
-[*]Settings in Unity Mod Manager's window; with Mod Menu, also in the game's options. Both show the same values.
+[*]The AI button (on the action bar or a party portrait) works in turn-based combat and switches real-time and turn-based AI together.
+[*]Switch a character's AI off during its AI-played turn and the rest of that turn is handed back to you at once.
+[*]Uses the game's own AI and each character's own AI brain—the same one it uses in real time. The Limited AI difficulty option applies just as in real time.
+[*]Per-kind rules for Main character, Companions, and Pets (plus Summons when ToyBox is installed): Follow the AI button, Always the AI, or Never the AI.
+[*]Per-character overrides for selected characters: Always the AI, Never the AI, or As its kind.
+[*]Settings in Unity Mod Manager's window (Ctrl+F10), and with Mod Menu also in Options -> Mods -> Turn-Based Party AI. Both show the same values, in English or Simplified Chinese to match the game's language.
 [*]The mod keeps none of its own data in your saves; the AI buttons are the game's own switches, which the game saves. With every AI button off and the default settings, turn-based combat runs exactly as without the mod.
 [/list]
 
-[b]How to use[/b]
-In turn-based combat, switch a character's AI on with the AI button. From that character's next turn the AI plays its turns until you switch it off again.
-
-By default nothing changes until you switch a character's AI on in turn-based mode. Two cases look as if it were on by default:
-[list]
-[*]If you clicked a character's AI button in turn-based mode before installing the mod, the game saved it as on (the unmodded game ignores it). The AI plays that character's turns right away; the button shows it as on.
-[*]In a fight the game forces into turn-based mode while you play in real time, the button shows the real-time switch, which is on unless you switched it off.
-[/list]
-
-[b]Installation[/b]
+[size=3][b]Installation & Quick Check[/b][/size]
 [list=1]
-[*]Install Unity Mod Manager (0.27.11 or later) for Pathfinder: Wrath of the Righteous 2.7.0.
-[*]Download TurnBasedPartyAI-0.0.1.zip and install it through Unity Mod Manager's Mods tab.
-[*]Open the settings in Unity Mod Manager's window (Ctrl+F10, the mod's row).
+[*]Install Unity Mod Manager (0.27.11 or later) for Pathfinder: Wrath of the Righteous 2.7.0. No other mod is required; the mod uses Unity Mod Manager's bundled Harmony and declares game version 2.7.0 (Unity Mod Manager will not load it on older versions).
+[*]Download TurnBasedPartyAI-0.0.1.zip and install it through Unity Mod Manager's Mods tab. Optional: Mod Menu (tested with 2.0.14) adds the settings to Options -> Mods; ToyBox is needed only for summons.
+[*]Launch the game, press Ctrl+F10 to open Unity Mod Manager, and click Turn-Based Party AI. Confirm the settings panel appears with Follow the AI button / Always the AI / Never the AI (and Always the AI / Never the AI / As its kind for selected characters). In turn-based combat, switch a companion's AI button on—from their next turn, the AI plays their turns until you switch it off.
 [/list]
-Requires game version 2.7.0. No other mod is required. Mod Menu (tested with 2.0.14) is optional and adds the settings to the game's options. ToyBox is needed only for summons. To uninstall, disable or remove the mod in Unity Mod Manager. Your saves do not depend on it, but the AI buttons stay as you last set them: a character whose AI you switched off in turn-based mode with the mod has it off in real time too, until you switch it on again.
 
-[b]Summons[/b]
-The game never lets you control summons: its AI plays their turns with or without this mod. ToyBox's "Make Controllable" option for summons lets you control them; while it is on, summons follow this mod's setting for summons. The setting for summons appears only when ToyBox is installed.
+[size=3][b]How to Use & Settings[/b][/size]
+In turn-based combat, click a character's AI button on the action bar or its party portrait. From that character's next turn, the AI plays its turns until you switch it off again.
 
-[b]Known limits[/b]
+By default, nothing changes until you switch a character's AI on in turn-based mode. Two cases can look as if the mod were on by default:
+[list]
+[*]If you clicked a character's AI button in turn-based mode before installing the mod, the game already saved it as on (the unmodded game ignores it). The AI plays that character's turns right away, and the button shows it as on.
+[*]In a fight the game forces into turn-based mode while you play in real time, the button shows the real-time switch, which is on unless you switched it off. Click the button off or set those characters to Never the AI if you want manual control there.
+[/list]
+
+[b]Single characters:[/b] Select characters in the game, then set them to Always the AI or Never the AI (As its kind removes the override). Unity Mod Manager's window lists every character with its own mode, with Remove (and Remove all when more than one is listed). On the Mod Menu page, Apply sets the selected characters, Show displays their current modes, and Remove clears every single character's mode.
+
+[b]Summons:[/b] The unmodded game never lets you control summons—its AI plays their turns with or without this mod. ToyBox's "Make Controllable" option for summons lets you control them; while it is on, summons follow this mod's Summons setting and single-character overrides. The Summons setting appears only when ToyBox is installed.
+
+Changes take effect from each character's next turn.
+
+[size=3][b]Save Safety, Uninstall & Compatibility[/b][/size]
+[list]
+[*][b]Save-safe:[/b] The mod keeps none of its own data in your saves; the AI buttons are the game's own switches, which the game saves. Settings are stored in plain text files in the mod's folder: KindModes.txt applies across every save, and CharacterModes.txt stores single-character overrides per character across every save of that playthrough.
+[*][b]Mid-playthrough install & uninstall:[/b] Safe to add or remove at any time in Unity Mod Manager. Your saves do not depend on it, but the AI buttons stay as you last set them: a character whose AI you switched off in turn-based mode with the mod has it off in real time too, until you switch it on again.
+[*][b]Patch rollback safety:[/b] If any Harmony patch fails to apply when loading (for example after an incompatible game update), the mod removes all of its patches and Unity Mod Manager reports it as not loaded instead of running half-patched.
+[*][b]Compatibility:[/b] Requires Wrath of the Righteous 2.7.0 and Unity Mod Manager 0.27.11 or later (uses UMM's bundled Harmony). No other mod is required.
+[/list]
+
+[size=3][b]Known Limits[/b][/size]
 [list]
 [*]During a character's AI-played turn you cannot select or command that character.
-[*]After you switch the AI off during that turn, an action the AI had already started (a full attack, for example) finishes first.
-[*]Switching the AI on, or changing a setting, takes effect from the character's next turn.
-[*]What a character does depends on its AI brain; the mod does not change how the game's AI chooses.
+[*]After you switch the AI off during that turn, an action the AI had already started (a full attack, for example) finishes first. If it used the character's whole round, the turn then ends.
+[*]Switching the AI on, or changing a setting, during a turn that waits for you takes effect from the character's next turn.
+[*]The Mod Menu page cannot list single characters' modes because Mod Menu pages are fixed when the game starts; Unity Mod Manager's window (Ctrl+F10) lists them. A summon's own mode lasts only for that summon: a new summon is a new character.
+[*]What a character does depends on its own AI brain; the mod does not change how the game's AI chooses actions or targets.
 [*]Not yet checked in the game: switching the AI off during an AI-played turn, the Mod Menu page, summons made controllable with ToyBox, pets, fights that force turn-based mode, and leaving turn-based mode, loading a save or leaving to the main menu during an AI-played turn.
 [/list]
 
-[b]中文简介[/b]
-回合制队伍 AI：在回合制战斗中，由游戏自带的 AI 替打开了 AI 按钮的队员走回合，和即时制里一样。AI 按钮同时切换即时制和回合制。默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走；在它的回合中关掉 AI，剩下的部分立刻交还给你。设置在 Unity Mod Manager 窗口（Ctrl+F10）中，装了 Mod Menu 时游戏选项里也有：可以按主角、队友、宠物（装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。模组自己的数据不写入存档；AI 按钮的开关由游戏保存，卸载后保持你最后的设置（装着模组时在回合制里关掉的 AI，即时制里也是关的）。注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。需要游戏版本 2.7.0。目前只在游戏里浅浅测了第一章开头（AI 替队友走回合、UMM 设置面板），欢迎反馈。
+[size=3][b]中文简介[/b][/size]
+回合制队伍 AI：在回合制战斗中，由游戏自带的 AI 替你选定的队员和宠物走回合，省去杂兵战逐个微操的繁琐，同时随时保留手动控制权。AI 按钮同时切换即时制和回合制。默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走；在它的回合中关掉 AI，剩下的部分立刻交还给你。按 Ctrl+F10 在 Unity Mod Manager 窗口中打开设置（装了 Mod Menu 时游戏“选项 -> Mods”里也有），界面随游戏语言自动显示简体中文或英文：可按主角、队友、宠物（装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可给选中的角色单独设为“总是 AI”或“从不 AI”（“跟随类别”可取消）。类别设置存在模组目录的 KindModes.txt（对所有存档生效），单角色设置存在 CharacterModes.txt（对该周目的所有存档生效）。模组自己的数据不写入存档；AI 按钮的开关由游戏保存，可随时安装或卸载，卸载后保持你最后的设置（装着模组时在回合制里关掉的 AI，即时制里也是关的）。若加载时任一 Harmony 补丁失败，模组会自动撤回全部补丁并提示未加载。注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。需要游戏版本 2.7.0 与 UMM 0.27.11+（无需其他前置模组）。目前只在游戏里浅浅测了第一章开头（AI 替队友走回合、UMM 设置面板正常），欢迎反馈。
 
-[b]Source and support[/b]
+[size=3][b]Source and Support[/b][/size]
 [url=https://github.com/Acture/wotr-turn-based-party-ai]GitHub[/url]
 [url=https://github.com/Acture/wotr-turn-based-party-ai/issues]Report an issue[/url]
 
