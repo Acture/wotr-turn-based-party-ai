@@ -25,14 +25,16 @@ turn-based mode too. Characters whose button is off wait for you as before.
 ## Install
 
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) (0.27.11 or later) for
-   Wrath of the Righteous 2.7.0.
+   Wrath of the Righteous 2.7.0. The mod declares game version 2.7.0 (Unity Mod Manager will not
+   load it on older game versions) and uses Unity Mod Manager's bundled Harmony.
 2. Download `TurnBasedPartyAI-<version>.zip` from
    [Nexus Mods](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/1278) or the
    [GitHub releases](https://github.com/Acture/wotr-turn-based-party-ai/releases), and add it in
-   Unity Mod Manager's Mods tab.
-3. Optional: [Mod Menu](https://github.com/WittleWolfie/ModMenu/releases) (tested with 2.0.14) puts
-   the settings in the game's options too. [ToyBox](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/8)
-   is needed only for summons (see Settings).
+   Unity Mod Manager's Mods tab. See [CHANGELOG.md](CHANGELOG.md) for release notes.
+3. No other mod is required. Optional: [Mod Menu](https://github.com/WittleWolfie/ModMenu/releases)
+   (tested with 2.0.14) puts the settings in the game's options too.
+   [ToyBox](https://www.nexusmods.com/pathfinderwrathoftherighteous/mods/8) is needed only for
+   summons (see Settings).
 
 To uninstall, disable or remove the mod in Unity Mod Manager. Your saves do not depend on it, but
 the AI buttons stay as you last set them: a character whose AI you switched off in turn-based mode
@@ -58,7 +60,8 @@ options. Two cases look as if the mod were on by default:
 ## Settings
 
 Open Unity Mod Manager's window (Ctrl+F10) and click the mod's row. With Mod Menu installed, the same
-settings are also under Options, Mods, "Turn-Based Party AI"; both show the same values.
+settings are also under Options, Mods, "Turn-Based Party AI"; both show the same values. The settings
+appear in English or Simplified Chinese to match the game's language.
 
 Who plays the turn-based turns of each kind of character:
 
@@ -71,10 +74,11 @@ Who plays the turn-based turns of each kind of character:
 
 Each kind is "Follow the AI button" (the default), "Always the AI" or "Never the AI".
 
-**Single characters:** select characters in the game, then give them their own mode, which replaces
-their kind's ("As its kind" removes it). Unity Mod Manager's window lists every character with its
-own mode, with a button to remove it. On the Mod Menu page, "Show" tells the modes of the selected
-characters and "Remove" removes every single character's mode.
+**Single characters:** select characters in the game, then set them to "Always the AI" or "Never the
+AI", which replaces their kind's mode ("As its kind" removes it). Unity Mod Manager's window lists
+every character with its own mode, with a "Remove" button for each (and "Remove all" when more than
+one is listed). On the Mod Menu page, "Show" tells the modes of the selected characters and "Remove"
+removes every single character's mode.
 
 **Summons:** the game never lets you control summons. Its AI plays their turns with or without this
 mod, so a mode for them changes nothing in the unmodded game. ToyBox's "Make Controllable" option for
@@ -82,7 +86,8 @@ summons lets you control them; while it is on, summons follow the mode for summo
 modes like any other character.
 
 Changes take effect from each character's next turn. The settings are kept in the mod's folder
-(`KindModes.txt`, `CharacterModes.txt`) and apply to every save; they are not written to saves.
+(`KindModes.txt` for kind modes across every save; `CharacterModes.txt` for single characters,
+matching each character across every save of its playthrough) and are not written to saves.
 
 ## Known limitations
 
@@ -111,8 +116,8 @@ Changes take effect from each character's next turn. The settings are kept in th
 [GitHub Releases](https://github.com/Acture/wotr-turn-based-party-ai/releases)，在 Unity Mod Manager 的 Mods 页添加 zip。
 
 - 默认什么都不变：在回合制下打开某个角色的 AI 按钮后，从它的下一个回合起由 AI 走。在它的回合中关掉 AI，剩下的部分立刻交还给你。
-- 设置在 Unity Mod Manager 窗口（Ctrl+F10）中；装了 Mod Menu 时，游戏选项里也有同样的设置。可以按主角、队友、宠物
-  （装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设置。
+- 设置在 Unity Mod Manager 窗口（Ctrl+F10）中；装了 Mod Menu 时，游戏选项里也有同样的设置（界面随游戏语言显示中文或英文）。
+  可以按主角、队友、宠物（装了 ToyBox 时还有召唤物）设为“跟随 AI 按钮”“总是 AI”或“从不 AI”，也可以给选中的角色单独设为“总是 AI”或“从不 AI”（“跟随类别”可取消）。
 - 模组自己的数据不写入存档；AI 按钮的开关是游戏自己的，由游戏保存，卸载后保持你最后的设置（装着模组时在回合制里关掉的 AI，
   即时制里也是关的，需要时手动打开）。所有 AI 按钮都关、设置为默认时，回合制战斗和没装模组时完全一样。
 - 注意：装模组之前在回合制下点开过 AI 按钮的角色，存档里已经是开的，装上后会直接由 AI 走。
@@ -123,7 +128,7 @@ Changes take effect from each character's next turn. The settings are kept in th
 Requires Windows, the .NET SDK, a WotR 2.7.0 installation and Mod Menu installed in its `Mods`
 folder (or `-p:ModMenuDll=path/to/ModMenu.dll`); the mod is compiled against Mod Menu but does not
 need it to run. Create an ignored `GamePath.props` at the repository root (or pass
-`-p:WrathInstallDir=...`):
+`-p:WrathInstallDir=...`, or set the `WrathPath` / `WRATH_PATH` environment variable):
 
 ```xml
 <Project>
@@ -143,9 +148,12 @@ dotnet build src/TurnBasedPartyAI/TurnBasedPartyAI.csproj -p:DeployToGame=true  
 When a party member's turn starts and the AI is to play it, the mod holds the game's own "not under
 the player's direct control" flag (`UnitEntityData.PreventDirectControl`) until the turn ends. The
 game uses the same flag in story scenes, for fleeing characters and during resurrection. The game's
-turn controller then lets its AI play the turn, as it does for enemies and allies. The flag is
-released when the turn ends, when combat ends, when the player leaves turn-based mode, when the AI
-is switched off and when the area is unloaded; it is not saved.
+turn controller then lets its AI play the turn, as it does for enemies and allies, while a small
+patch on `BlueprintAiAction.IsActorValid` keeps the Limited AI option restricting actions as it does
+in real time. The flag is released when the turn ends, when combat ends, when the player leaves
+turn-based mode, when the AI is switched off and when the area is unloaded; it is not saved. If any
+Harmony patch fails to apply when loading, the mod removes all of its patches and Unity Mod Manager
+reports it as not loaded instead of running half-patched.
 
 ## Tests
 
@@ -184,10 +192,18 @@ run, so that case is not covered offline.
 
 Offline results do not replace a check in the game.
 
-GitHub Actions runs only the repository checks, `python tests/check_repository.py` and its tests:
-no game files or build output are tracked, Info.json, the project, the changelog and the Nexus Mods
-description name the same version, and links work. Building the mod and the offline tests need the
-game's assemblies, so they run on a machine with the game installed.
+GitHub Actions runs only the repository checks (plus `ruff` and `ty` on `tests/`), which need only
+Python and Git:
+
+```powershell
+python tests/check_repository.py
+python -m unittest discover -s tests -p 'test_*.py'
+```
+
+They check that no game files or build output are tracked, that `Info.json`, the project,
+`CHANGELOG.md`, `README.md` and `docs/nexus-description.bbcode` agree on metadata and version, that
+the entry method exists, and that relative Markdown links resolve to tracked files. Building the mod
+and the offline tests need the game's assemblies, so they run on a machine with the game installed.
 
 ## License
 
